@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.local
+data/chroma/
+data/files_cache.json
+data/local_graph.json
+data/raw_downloads/
+data/datasets/*/project_code/
+tools/neo4j-community-*/
+tools/*.zip
+data/neo4j-*.log
+*.log
+.DS_Store
+Thumbs.db

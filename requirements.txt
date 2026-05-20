@@ -1,0 +1,24 @@
+neo4j>=5.0.0
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+pymupdf>=1.23.0
+python-docx>=1.0.0
+python-pptx>=0.6.21
+python-magic-bin>=0.4.14; sys_platform == 'win32'
+python-magic>=0.4.27; sys_platform != 'win32'
+dateparser>=1.2.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+prefixspan>=0.5.2
+pillow>=10.0.0
+transformers>=4.30.0
+torch>=2.0.0
+numpy>=1.24.0
+httpx>=0.24.0
+pydantic>=2.0.0
+pytest>=7.4.0
+rank-bm25>=0.2.2
+pandas>=2.0.0
+pyarrow>=14.0.0
+huggingface_hub>=0.20.0
