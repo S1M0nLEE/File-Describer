@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>个人文件知识图谱</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      FileKG
+      <small>多模态 · 视觉融合图谱</small>
+    </div>
+    <button type="button" class="nav-btn" data-tab="rag">智能问答</button>
+    <button type="button" class="nav-btn active" data-tab="search">检索</button>
+    <button type="button" class="nav-btn" data-tab="graph">图谱浏览</button>
+    <button type="button" class="nav-btn" data-tab="visual">视觉关系</button>
+    <button type="button" class="nav-btn" data-tab="index">索引目录</button>
+    <button type="button" class="nav-btn" data-tab="files">文件列表</button>
+    <button type="button" class="nav-btn" data-tab="system">系统</button>
+    <button type="button" class="nav-btn load-index-btn" id="openLoadBtn">加载全局索引</button>
+    <div id="statusPill" class="status-pill"><span class="dot"></span>连接中…</div>
+  </aside>
+
+  <div id="loadOverlay" class="load-overlay" aria-hidden="true">
+    <div class="load-card" role="dialog" aria-labelledby="loadTitle">
+      <h2 id="loadTitle">加载全局文件索引</h2>
+      <p class="load-desc">
+        服务已快速启动。加载后可使用检索、智能问答、文件列表与图谱浏览。
+        数据来自本机已建立的 <code>graph_store.json</code>（体积可能较大，请耐心等待）。
+      </p>
+      <label class="chk load-opt">
+        <input type="checkbox" id="loadBuildCorpus" />
+        同时构建全量检索语料（文件很多时明显变慢，也可稍后在首次检索时自动构建）
+      </label>
+      <div id="loadProgressWrap" class="load-progress-wrap hidden">
+        <div class="progress-track" aria-hidden="true">
+          <div id="loadProgressFill" class="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="load-progress-meta">
+          <span id="loadProgressPct">0%</span>
+          <span id="loadProgressText">准备中…</span>
+        </div>
+      </div>
+      <p id="loadError" class="load-error hidden"></p>
+      <div class="load-actions" id="loadActions">
+        <button type="button" class="btn" id="loadStartBtn">确认加载</button>
+        <button type="button" class="btn secondary" id="loadLaterBtn">稍后再说</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="main">
+    <section class="panel" data-panel="rag">
+      <h2>DeepSeek RAG 问答</h2>
+      <p class="sub">基于本机已索引文件的检索增强生成 · 模型 deepseek-v4-pro</p>
+      <div class="row">
+        <button type="button" class="btn secondary" id="ragStatusBtn">检查状态</button>
+        <button type="button" class="btn secondary" id="ragIndexBtn">索引本机目录</button>
+        <label class="chk"><input type="checkbox" id="ragIndexClear" /> 清空后重建</label>
+      </div>
+      <div class="row index-mm-row">
+        <label class="chk toggle-mm" title="开启后对图片/视频/音频做描述与转写，索引明显变慢">
+          <input type="checkbox" class="indexMultimodalToggle" id="ragIndexMultimodal" />
+          索引时启用多模态（图片/音视频描述）
+        </label>
+        <span class="meta" id="ragMultimodalHint">默认关闭，仅文本快速索引</span>
+      </div>
+      <div class="meta" id="ragStatusMeta"></div>
+      <div class="row rag-topk-row">
+        <label class="chk" title="Description 检索参与排序的节点数量，将原样传给 DeepSeek 上下文">
+          检索 Top-K
+          <input type="number" id="ragTopK" value="10" min="1" max="50" step="1" />
+        </label>
+        <button type="button" class="btn secondary" id="ragPreviewBtn">预览排序结果</button>
+        <span class="meta" id="ragTopKHint">按节点 Description 打分后取前 K 个</span>
+      </div>
+      <div id="ragPreview" class="rag-preview"></div>
+      <div id="ragChat" class="rag-chat"></div>
+      <div class="row rag-input-row">
+        <textarea id="ragQuestion" rows="2" placeholder="例如：我有哪些关于合同或论文的文档？上周修改过的表格在哪？"></textarea>
+        <button type="button" class="btn" id="ragSendBtn">发送</button>
+      </div>
+    </section>
+
+    <section class="panel active" data-panel="search">
+      <h2>语义检索</h2>
+      <p class="sub">BGE 文本 · CLIP/视觉向量 · 图多跳扩展 · OCR/文档页/近重复融合边</p>
+      <div id="centerBanner" class="banner"></div>
+      <div class="row">
+        <input id="q" type="text" placeholder="自然语言：合同 PDF、截图对应原稿、海边照片、会议录音…" />
+        <button type="button" class="btn" id="searchBtn">搜索</button>
+        <button type="button" class="btn secondary" id="clearNavBtn">清除导航</button>
+      </div>
+      <div class="row filters">
+        <label class="chk"><input type="checkbox" id="expandGraph" checked /> 图扩展</label>
+        <label class="chk"><input type="checkbox" id="visualOnly" /> 仅视觉边扩展</label>
+        <select id="relationFilter" class="select">
+          <option value="">全部关系导航</option>
+          <option value="VISUALLY_SIMILAR_TO">视觉相似</option>
+          <option value="NEAR_DUPLICATE">近重复</option>
+          <option value="SIMILAR_TO">语义相似</option>
+          <option value="DEPENDS_ON">依赖</option>
+          <option value="REFERENCES">引用</option>
+        </select>
+      </div>
+      <div id="sampleQueries" class="chips"></div>
+      <div class="meta" id="meta"></div>
+      <div class="results" id="results"></div>
+      <div class="edges">
+        <h3>关系子图</h3>
+        <div id="edges"></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="graph">
+      <h2>图谱浏览</h2>
+      <p class="sub">力导向图展示 File 节点与关系边（配色区分 12+ 种关系，类似 Neo4j Browser）</p>
+      <div class="row">
+        <input id="graphCenterId" type="text" placeholder="中心节点 file_id（留空=高度数采样）" />
+        <label class="chk">跳数
+          <select id="graphHops" class="select">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <label class="chk">最多节点
+          <select id="graphMaxNodes" class="select">
+            <option value="40">40</option>
+            <option value="80" selected>80</option>
+            <option value="120">120</option>
+          </select>
+        </label>
+        <button type="button" class="btn" id="graphLoadBtn">加载子图</button>
+        <button type="button" class="btn secondary" id="graphSampleBtn">采样总览</button>
+      </div>
+      <div class="meta" id="graphCenterHint"></div>
+      <div class="meta" id="graphMeta"></div>
+      <div id="graphLegend" class="graph-legend"></div>
+      <div class="graph-layout">
+        <div id="graphNetwork" class="graph-network"></div>
+        <aside id="graphDetail" class="graph-detail"></aside>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="visual">
+      <h2>视觉关系浏览</h2>
+      <p class="sub">沿 VISUALLY_SIMILAR_TO / NEAR_DUPLICATE 查看邻居与置信度（HIGH / MED / LOW）</p>
+      <div class="row">
+        <input id="navFileId" type="text" placeholder="file_id 或从检索结果点击「查看邻居」" />
+        <button type="button" class="btn secondary" id="navVisualBtn">仅视觉邻居</button>
+        <button type="button" class="btn" id="navAllBtn">全部邻居</button>
+      </div>
+      <div id="navCenter" class="nav-center"></div>
+      <div id="navNeighbors" class="neighbor-grid"></div>
+      <div class="edges" style="margin-top:1.5rem">
+        <h3>图谱关系统计</h3>
+        <div id="relationBars" class="relation-bars"></div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="index">
+      <h2>建立索引</h2>
+      <p class="sub">扫描目录并写入向量库；默认仅文本 BGE（快），可开启多模态描述</p>
+      <div class="row">
+        <input id="indexPath" type="text" placeholder="例如 C:\Users\你的用户名\Documents（留空则用 RAG 本机目录）" value="" />
+        <button type="button" class="btn" id="indexBtn">开始索引</button>
+      </div>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="indexClear" /> 清空后重建</label>
+        <label class="chk">最多 <input type="number" id="indexMax" value="0" min="0" title="0=不限" /></label>
+      </div>
+      <div class="row index-mm-row">
+        <label class="chk toggle-mm">
+          <input type="checkbox" class="indexMultimodalToggle" id="indexMultimodal" />
+          索引时启用多模态（图片/音视频描述）
+        </label>
+        <span class="meta" id="indexMultimodalHint">默认关闭，仅文本快速索引</span>
+      </div>
+      <div id="indexStats" class="index-stats"></div>
+      <pre class="log" id="indexLog">填写目录后点击「开始索引」</pre>
+    </section>
+
+    <section class="panel" data-panel="files">
+      <h2>已索引文件</h2>
+      <p class="sub">默认显示本机目录索引（Documents/Desktop 等）；评测样例在「评测数据集」</p>
+      <div class="row">
+        <select id="fileScope" class="select">
+          <option value="local" selected>本机索引</option>
+          <option value="benchmark">评测数据集</option>
+          <option value="all">全部</option>
+        </select>
+        <input id="fileFilter" type="text" placeholder="文件名 / 路径" />
+        <select id="fileExtFilter" class="select">
+          <option value="">全部类型</option>
+          <option value=".png">图片</option>
+          <option value=".pdf">PDF</option>
+          <option value=".mp4">视频</option>
+          <option value=".mp3">音频</option>
+          <option value=".py">代码</option>
+        </select>
+        <button type="button" class="btn secondary" id="fileRefresh">刷新</button>
+      </div>
+      <div class="meta" id="fileMeta"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>名称</th><th>路径</th><th>状态</th><th></th></tr></thead>
+          <tbody id="fileTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="system">
+      <h2>系统与能力</h2>
+      <p class="sub">当前配置与维护；API 文档 <a href="/docs" target="_blank">/docs</a></p>
+      <div id="featureGrid" class="feature-grid"></div>
+      <div class="sys-grid">
+        <div class="sys-card">
+          <h4>一致性检查</h4>
+          <p>图与向量库对齐</p>
+          <button type="button" class="btn secondary" id="consistencyBtn">运行</button>
+        </div>
+        <div class="sys-card">
+          <h4>生命周期</h4>
+          <p>临时/备份状态规则</p>
+          <button type="button" class="btn secondary" id="lifecycleBtn">运行</button>
+        </div>
+      </div>
+      <pre class="log" id="sysLog">操作日志</pre>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <script src="/static/graph-viz.js?v=1"></script>
+  <script src="/static/app.js?v=11"></script>
+</body>
+</html>

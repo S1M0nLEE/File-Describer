@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.env
+
+# 本地索引与向量（体积大，勿提交）
+data/chroma/
+data/chroma_eval/
+data/graph_store.json
+data/graph_store.json.tmp
+data/graph_store.pkl
+data/graph_store.cache.meta.json
+data/search_corpus.pkl
+data/search_corpus.meta.json
+data/graph_eval/
+data/benchmarks/
+data/index_local_state.json
+data/runtime_manifest.json
+
+*.log

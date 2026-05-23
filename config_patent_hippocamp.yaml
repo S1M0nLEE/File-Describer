@@ -1,0 +1,62 @@
+# HippoCamp 等英文 QA + 多模态文件：英文向量 + 开启视觉关系
+# 用法: python scripts/run_evaluation.py --config config_patent_hippocamp.yaml --registry real --dataset hippocamp_adam
+
+neo4j:
+  uri: bolt://localhost:7687
+  user: neo4j
+  password: filekg123
+
+chroma:
+  persist_directory: ./data/chroma
+
+index:
+  watch_roots: []
+  chunk_size: 512
+  similar_threshold: 0.80
+  similar_top_k: 10
+  near_time_window_minutes: 20
+  near_time_max_pairs: 50
+  dormant_days: 30
+  deprecated_observation_days: 7
+
+llm:
+  enabled: true
+  ollama_base: http://localhost:11434
+  model: phi3:mini
+
+visual:
+  enabled: true
+  threshold: 0.85
+  model: openai/clip-vit-base-patch32
+
+workflow:
+  collection_enabled: true
+  min_support: 2
+
+embeddings:
+  model_name: BAAI/bge-small-en-v1.5
+  dimension: 384
+  backend: auto
+
+search:
+  seed_top_n: 60
+  result_top_n: 20
+  graph_hops: 2
+  weights:
+    semantic: 0.52
+    graph: 0.22
+    time: 0.08
+    rule: 0.13
+    personal: 0.05
+  time_decay_lambda: 0.008
+
+relation_weights:
+  SIMILAR_TO: 0.85
+  IN_FOLDER: 0.70
+  REFERENCES: 0.75
+  NEAR_IN_TIME: 0.50
+  WORKFLOW_WITH: 0.60
+  VISUALLY_SIMILAR_TO: 0.55
+  DEPENDS_ON: 0.50
+  HAS_VERSION: 0.40
+  CONTAINS: 0.50

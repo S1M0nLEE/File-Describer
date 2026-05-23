@@ -1,0 +1,78 @@
+# 专利说明书「全功能实施例」配置（对照实验/审查员复现）
+# 用法: python scripts/run_evaluation.py --config config_patent_full.yaml ...
+
+neo4j:
+  uri: bolt://localhost:7687
+  user: neo4j
+  password: filekg123
+
+chroma:
+  persist_directory: ./data/chroma
+
+index:
+  watch_roots: []
+  chunk_size: 512
+  similar_threshold: 0.82
+  similar_top_k: 8
+  near_time_window_minutes: 15
+  near_time_max_pairs: 40
+  dormant_days: 30
+  deprecated_observation_days: 7
+
+llm:
+  enabled: true
+  ollama_base: http://localhost:11434
+  model: phi3:mini
+
+visual:
+  enabled: true
+  fusion_mode: multi_route
+  threshold: 0.88
+  model: openai/clip-vit-base-patch32
+  doc_backend: auto
+  theta_text: 0.75
+  theta_doc: 0.7
+  theta_align_low: 0.4
+  theta_align_med: 0.55
+  theta_visual_high: 0.9
+  theta_visual_med: 0.75
+  phash_threshold: 6
+  merge_near_duplicate_results: true
+
+patent:
+  visual_only: true
+
+workflow:
+  collection_enabled: false
+  min_support: 2
+
+embeddings:
+  model_name: BAAI/bge-small-zh-v1.5
+  dimension: 512
+  backend: auto
+
+search:
+  seed_top_n: 50
+  result_top_n: 20
+  graph_hops: 2
+  weights:
+    semantic: 0.45
+    graph: 0.25
+    time: 0.10
+    rule: 0.15
+    personal: 0.05
+  time_decay_lambda: 0.01
+
+relation_weights:
+  SIMILAR_TO: 0.85
+  IN_FOLDER: 0.75
+  SAME_TYPE: 0.45
+  NEAR_IN_TIME: 0.55
+  DEPENDS_ON: 0.92
+  REFERENCES: 0.70
+  VISUALLY_SIMILAR_TO: 0.60
+  NEAR_DUPLICATE: 0.58
+  HAS_VERSION: 0.35
+  CONTAINS: 0.55
+  IS_BACKUP_OF: 0.45
+  BELONGS_TO_PROJECT: 0.55

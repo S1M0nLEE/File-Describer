@@ -1,0 +1,132 @@
+api:
+  fast_startup: true
+  manual_load: true
+  preload_graph: false
+  disk_cache: true
+  persist_on_shutdown: false
+  heartbeat_enabled: true
+  heartbeat_interval_minutes: 30
+  heartbeat_initial_delay_seconds: 90
+  heartbeat_skip_relations: true
+
+neo4j:
+  uri: bolt://localhost:7687
+  user: neo4j
+  password: filekg123
+
+chroma:
+  persist_directory: ./data/chroma
+
+index:
+  watch_roots: []
+  chunk_size: 512
+  similar_threshold: 0.85
+  similar_top_k: 5
+  near_time_window_minutes: 10
+  near_time_max_pairs: 20
+  dormant_days: 30
+  deprecated_observation_days: 7
+
+llm:
+  enabled: true
+  ollama_base: http://localhost:11434
+  model: phi3:mini
+
+# DeepSeek RAG（API Key 放 .env 的 DEEPSEEK_API_KEY）
+deepseek:
+  enabled: true
+  base_url: https://api.deepseek.com
+  model: deepseek-v4-pro
+  temperature: 0.3
+  max_tokens: 4096
+  reasoning_effort: high
+  thinking_enabled: true
+
+rag:
+  top_k: 10
+  top_k_max: 50
+  chunk_max_chars: 1200
+  use_graph_search: false
+  desc_pool: 800
+  index_multimodal: false
+  max_files_per_root: 30000
+  index_roots:
+    - "${USERPROFILE}/Documents"
+    - "${USERPROFILE}/Desktop"
+    - "${USERPROFILE}/Downloads"
+    - "${USERPROFILE}/Pictures"
+    - "${USERPROFILE}/Videos"
+
+visual:
+  enabled: true
+  fusion_mode: multi_route
+  threshold: 0.82
+  model: openai/clip-vit-base-patch32
+  doc_backend: auto
+  layoutlm_model: microsoft/layoutlmv3-base
+  theta_text: 0.75
+  theta_doc: 0.7
+  theta_align_low: 0.4
+  theta_align_med: 0.55
+  theta_visual_high: 0.9
+  theta_visual_med: 0.75
+  phash_threshold: 6
+  prefilter_threshold: 0.55
+  emit_low_confidence: false
+  merge_near_duplicate_results: true
+
+patent:
+  visual_only: false
+
+multimodal:
+  enabled: true
+  whisper_enabled: true
+  # Ollama 无名为 whisper 的官方模型；留空则自动用 faster-whisper（推荐）
+  whisper_model: ""
+  faster_whisper_size: base
+  vision_caption_enabled: true
+  vision_llm_model: moondream
+  visual_index_enabled: true
+  fuse_visual_search: true
+  video_max_frames: 5
+  max_audio_bytes: 52428800
+  max_video_bytes: 209715200
+  max_image_bytes: 15728640
+  ollama_timeout: 300
+
+workflow:
+  collection_enabled: true
+  min_support: 2
+
+embeddings:
+  model_name: BAAI/bge-small-zh-v1.5
+  dimension: 512
+  # auto | sentence_transformers | fastembed | hash
+  backend: auto
+
+search:
+  seed_top_n: 50
+  result_top_n: 20
+  graph_hops: 2
+  weights:
+    semantic: 0.50
+    graph: 0.20
+    time: 0.10
+    rule: 0.15
+    personal: 0.05
+  time_decay_lambda: 0.01
+
+relation_weights:
+  SIMILAR_TO: 0.8
+  IN_FOLDER: 0.7
+  SAME_TYPE: 0.4
+  NEAR_IN_TIME: 0.5
+  DEPENDS_ON: 0.9
+  REFERENCES: 0.6
+  WORKFLOW_WITH: 0.6
+  VISUALLY_SIMILAR_TO: 0.5
+  NEAR_DUPLICATE: 0.55
+  HAS_VERSION: 0.3
+  CONTAINS: 0.5
+  IS_BACKUP_OF: 0.4
+  BELONGS_TO_PROJECT: 0.5
