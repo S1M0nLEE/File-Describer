@@ -158,7 +158,7 @@ class MemoryGraphStore:
     ) -> list[dict[str, Any]]:
         self._ensure_loaded()
         results: list[dict[str, Any]] = []
-        seen: set[str] = set()
+        seen_pairs: set[tuple[str, str]] = set()
         frontier = {file_id}
 
         for _ in range(hops):
@@ -176,12 +176,13 @@ class MemoryGraphStore:
                         direction_from = fid
                     if not other or other == file_id:
                         continue
-                    if other in seen:
+                    pair = (other, e["type"])
+                    if pair in seen_pairs:
                         continue
                     node = self._nodes.get(other)
                     if not node:
                         continue
-                    seen.add(other)
+                    seen_pairs.add(pair)
                     next_frontier.add(other)
                     edge_props = {
                         k: e[k]

@@ -1,46 +1,12 @@
-from .base import RelationExtractor, Edge
-from .in_folder import InFolderExtractor
-from .same_type import SameTypeExtractor
-from .near_in_time import NearInTimeExtractor
-from .has_version import HasVersionExtractor
-from .depends_on import DependsOnExtractor
-from .references import ReferencesExtractor
-from .contains import ContainsExtractor
-from .similar_to import SimilarToExtractor
-from .workflow_with import WorkflowWithExtractor
-from .visually_similar_to import VisuallySimilarToExtractor
-from .belongs_to_project import BelongsToProjectExtractor
-from .tagged_with import TaggedWithExtractor
+from .base import Edge, RelationEdge, RelationExtractor, RelationParser
 
-ALL_EXTRACTORS = [
-    InFolderExtractor,
-    SameTypeExtractor,
-    NearInTimeExtractor,
-    HasVersionExtractor,
-    DependsOnExtractor,
-    ReferencesExtractor,
-    ContainsExtractor,
-    SimilarToExtractor,
-    WorkflowWithExtractor,
-    VisuallySimilarToExtractor,
-    BelongsToProjectExtractor,
-    TaggedWithExtractor,
-]
+# Legacy extractor registry kept for src.pipeline.graph_builder compatibility.
+ALL_EXTRACTORS: list[type] = []
 
 __all__ = [
+    "RelationParser",
     "RelationExtractor",
+    "RelationEdge",
     "Edge",
     "ALL_EXTRACTORS",
-    "InFolderExtractor",
-    "SameTypeExtractor",
-    "NearInTimeExtractor",
-    "HasVersionExtractor",
-    "DependsOnExtractor",
-    "ReferencesExtractor",
-    "ContainsExtractor",
-    "SimilarToExtractor",
-    "WorkflowWithExtractor",
-    "VisuallySimilarToExtractor",
-    "BelongsToProjectExtractor",
-    "TaggedWithExtractor",
 ]

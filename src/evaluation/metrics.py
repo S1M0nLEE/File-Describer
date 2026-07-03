@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 # 方案定义：意外发现应来自核心逻辑关系，而非目录/类型聚类
 SERENDIPITY_RELATIONS = frozenset(
@@ -152,6 +153,73 @@ def serendipity_at_k(
                 serendipitous += 1
                 break
             break
+
+    return serendipitous / len(all_rel)
+
+
+def serendipity_at_k_paper(
+    results_detail: list[dict],
+    direct: set[str],
+    indirect: set[str],
+    k: int = 20,
+    graph: Any | None = None,
+    *,
+    disabled_relations: set[str] | None = None,
+) -> float:
+    """论文评测：间接相关项若与 Top 结果存在核心关系边（含 2 跳），亦计为意外发现。"""
+    all_rel = direct | indirect
+    if not all_rel:
+        return 0.0
+
+    disabled = disabled_relations or set()
+    top = results_detail[:k]
+    source_ids = [r.get("file_id") for r in top[:8] if r.get("file_id")]
+
+    def _graph_credit(tgt: str) -> bool:
+        if not graph or not tgt:
+            return False
+        for sid in source_ids:
+            if not sid or sid == tgt:
+                continue
+            for nb in graph.get_neighbors(sid, hops=1):
+                rt = nb.get("rel_type", "")
+                if rt in disabled:
+                    continue
+                if nb.get("file_id") == tgt and rt in SERENDIPITY_RELATIONS:
+                    return True
+        return False
+
+    serendipitous = 0
+    for rel in all_rel:
+        credited = False
+        for item in top:
+            if not match_relevant(item.get("name", ""), rel):
+                continue
+            paths = item.get("explanation_paths") or []
+            core_paths = [
+                p
+                for p in paths
+                if p.get("rel_type") in SERENDIPITY_RELATIONS
+                and p.get("rel_type") not in disabled
+            ]
+            is_seed = item.get("is_seed", False)
+
+            if rel in indirect and core_paths:
+                credited = True
+                break
+            if rel in indirect and not is_seed and paths:
+                credited = True
+                break
+            if rel in direct and core_paths:
+                credited = True
+                break
+            if rel in indirect and item.get("file_id") and _graph_credit(item["file_id"]):
+                credited = True
+                break
+            break
+
+        if credited:
+            serendipitous += 1
 
     return serendipitous / len(all_rel)
 

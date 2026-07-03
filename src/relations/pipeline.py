@@ -54,11 +54,20 @@ class RelationDiscoveryPipeline:
     ) -> dict[str, int]:
         import os
 
+        from src.relations.behavior_ema import apply_behavior_ema
+        from src.relations.cold_start import ColdStartManager
+
         stats: dict[str, int] = {}
         fast = os.environ.get("FILEKG_INDEX_FAST", "").lower() in ("1", "true", "yes")
         skip_heavy = fast and len(descriptors) > 5000
+        cs = ColdStartManager.get()
+        cs.on_file_event(len(descriptors))
         for parser in self.parsers:
             if not parser.enabled:
+                continue
+
+            if not cs.parser_enabled(parser.name):
+                logger.info("冷启动：跳过 %s", parser.name)
                 continue
             if skip_heavy and parser.name in ("visual_fusion", "similar_to"):
                 logger.info("快速批量索引：跳过 %s", parser.name)
@@ -70,4 +79,5 @@ class RelationDiscoveryPipeline:
             if self.on_progress:
                 self.on_progress(parser.name, count)
             logger.info("  -> 建立 %d 条边", count)
+        apply_behavior_ema(store)
         return stats

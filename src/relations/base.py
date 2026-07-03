@@ -19,6 +19,10 @@ class RelationEdge:
     props: dict = field(default_factory=dict)
 
 
+# Legacy aliases used by older extractor modules and __init__.py exports.
+Edge = RelationEdge
+
+
 class RelationParser(ABC):
     name: str = "base"
     enabled: bool = True
@@ -44,3 +48,6 @@ class RelationParser(ABC):
                 )
             count += 1
         return count
+
+
+RelationExtractor = RelationParser

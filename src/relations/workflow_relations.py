@@ -20,7 +20,7 @@ class WorkflowParser(RelationParser):
     ) -> list[RelationEdge]:
         if settings.patent_visual_only:
             return []
-        log_path = Path("data/workflow_log.jsonl")
+        log_path = settings.data_dir / "workflow_log.jsonl"
         if not log_path.exists():
             return []
 
@@ -32,16 +32,16 @@ class WorkflowParser(RelationParser):
             for line in f:
                 try:
                     entry = json.loads(line)
-                    fid = path_to_id.get(entry.get("path", ""))
-                    if not fid:
-                        continue
                     if entry.get("event") == "session_end":
                         if len(current) >= 2:
                             sequences.append(current)
                         current = []
-                    else:
-                        if not current or current[-1] != fid:
-                            current.append(fid)
+                        continue
+                    fid = path_to_id.get(entry.get("path", ""))
+                    if not fid:
+                        continue
+                    if not current or current[-1] != fid:
+                        current.append(fid)
                 except json.JSONDecodeError:
                     continue
         if len(current) >= 2:

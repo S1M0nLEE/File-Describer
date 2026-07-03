@@ -420,7 +420,7 @@ async def consistency_check():
         raise HTTPException(503, f"图存储加载失败: {e}") from e
     from src.indexing.consistency import ConsistencyChecker
 
-    return ConsistencyChecker(graph, chroma).run()
+    return ConsistencyChecker(graph, chroma).global_consistency_check(settings.index_watch_roots or None)
 
 
 @app.post("/lifecycle/run")

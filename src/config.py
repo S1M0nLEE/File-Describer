@@ -63,12 +63,40 @@ class Settings(BaseSettings):
         default=_yaml.get("embeddings", {}).get("model_name", "BAAI/bge-small-zh-v1.5")
     )
     embedding_dim: int = Field(default=_yaml.get("embeddings", {}).get("dimension", 512))
+    embedding_raw_dim: int = Field(default=int(_yaml.get("embeddings", {}).get("raw_dimension", 384)))
+    embedding_use_projection: bool = Field(
+        default=_yaml.get("embeddings", {}).get("use_projection", True)
+    )
     embedding_backend: str = Field(
         default=_yaml.get("embeddings", {}).get("backend", "auto")
     )
 
+    vfe_id_mode: str = Field(default=_yaml.get("vfe", {}).get("id_mode", "volume"))
+    vfe_memory_capacity: int = Field(default=int(_yaml.get("vfe", {}).get("memory_capacity", 50)))
+    vfe_near_time_window_seconds: float = Field(
+        default=float(_yaml.get("vfe", {}).get("near_time_window_seconds", 300))
+    )
+    vfe_relation_ema_alpha: float = Field(
+        default=float(_yaml.get("vfe", {}).get("relation_ema_alpha", 0.7))
+    )
+    index_purge_days: int = Field(default=int(_yaml.get("index", {}).get("purge_days", 365)))
+
+    cold_start_near_in_time_events: int = Field(
+        default=int(_yaml.get("cold_start", {}).get("near_in_time_events", 50))
+    )
+    cold_start_workflow_events: int = Field(
+        default=int(_yaml.get("cold_start", {}).get("workflow_events", 150))
+    )
+    consistency_interval_hours: int = Field(
+        default=int(_yaml.get("consistency", {}).get("interval_hours", 24))
+    )
+    workflow_max_gap: int = Field(default=int(_yaml.get("workflow", {}).get("max_gap", 5)))
+
     similar_threshold: float = Field(default=_yaml.get("index", {}).get("similar_threshold", 0.85))
     similar_top_k: int = Field(default=_yaml.get("index", {}).get("similar_top_k", 5))
+    index_watch_roots: list[str] = Field(
+        default_factory=lambda: _yaml.get("index", {}).get("watch_roots", [])
+    )
     near_time_window_minutes: int = Field(
         default=_yaml.get("index", {}).get("near_time_window_minutes", 10)
     )

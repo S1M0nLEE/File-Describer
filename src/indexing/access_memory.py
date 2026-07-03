@@ -6,6 +6,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
+from src.config import settings
 from src.storage.factory import GraphStore
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,8 @@ class AccessMemory:
             return
         logs: list[dict] = list(node.get("access_log") or [])
         logs.append(entry)
-        logs = logs[-200:]
+        cap = int(getattr(settings, "vfe_memory_capacity", 50))
+        logs = logs[-cap:]
         updates = {"access_log": logs, "last_accessed": entry["hit_at"]}
         self._patch_node(file_id, updates, flush=False)
 

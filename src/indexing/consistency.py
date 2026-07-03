@@ -20,7 +20,7 @@ class ConsistencyChecker:
         self.log: list[str] = []
 
     def run(self) -> dict[str, int]:
-        stats = {"ghost": 0, "dangling_marked": 0, "vector_repaired": 0, "dead_edges": 0}
+        stats = {"ghost": 0, "dangling_marked": 0, "vector_repaired": 0, "dead_edges": 0, "archived": 0, "rescanned": 0}
 
         graph_ids = set()
         for item in self.graph.list_all_files():
@@ -29,6 +29,11 @@ class ConsistencyChecker:
             node = self.graph.get_file(fid) or item
             path = node.get("path", "")
             if not path or not Path(path).exists():
+                if node.get("status") not in (FileStatus.ARCHIVED.value, FileStatus.GHOST.value):
+                    self._archive_missing(fid, node)
+                    stats["archived"] += 1
+                    self.log.append(f"ARCHIVED: {fid} {path}")
+                    continue
                 if self._try_resolve_ghost(fid, path):
                     stats["ghost"] += 1
                     self.log.append(f"GHOST: {fid} {path}")
@@ -62,6 +67,55 @@ class ConsistencyChecker:
         if hasattr(self.graph, "flush"):
             self.graph.flush()
         return stats
+
+    def global_consistency_check(self, watch_roots: list[str] | None = None) -> dict[str, int]:
+        """规格 5.4：图-向量-物理文件三方对齐。"""
+        stats = self.run()
+        if self.chroma:
+            chroma_ids = set(self.chroma.list_file_ids())
+            graph_ids = {f["file_id"] for f in self.graph.list_all_files()}
+            for missing in chroma_ids - graph_ids:
+                self.chroma.delete_file(missing)
+                stats["dead_edges"] = stats.get("dead_edges", 0) + 1
+            for fid in graph_ids - chroma_ids:
+                node = self.graph.get_file(fid)
+                if node and node.get("summary"):
+                    try:
+                        from src.indexing.scanner import build_descriptor
+
+                        desc = build_descriptor(Path(node["path"]))
+                        desc.file_id = fid
+                        self.chroma.upsert_file(desc)
+                        stats["vector_repaired"] = stats.get("vector_repaired", 0) + 1
+                    except Exception:
+                        pass
+        if watch_roots:
+            from src.indexing.builder import IndexBuilder
+
+            builder = IndexBuilder(neo4j=self.graph, chroma=self.chroma)
+            for root in watch_roots:
+                root_p = Path(root)
+                if not root_p.is_dir():
+                    continue
+                indexed_paths = {
+                    (self.graph.get_file(f["file_id"]) or f).get("path")
+                    for f in self.graph.list_all_files()
+                }
+                for fp in root_p.rglob("*"):
+                    if fp.is_file() and str(fp.resolve()) not in indexed_paths:
+                        try:
+                            builder.index_single(fp)
+                            stats["rescanned"] = stats.get("rescanned", 0) + 1
+                        except Exception:
+                            pass
+        return stats
+
+    def _archive_missing(self, fid: str, node: dict) -> None:
+        updates = {"status": FileStatus.ARCHIVED.value, "path": None}
+        if hasattr(self.graph, "_nodes") and fid in self.graph._nodes:
+            self.graph._nodes[fid].update(updates)
+        elif hasattr(self.graph, "patch_file"):
+            self.graph.patch_file(fid, updates)
 
     def _try_resolve_ghost(self, fid: str, path: str) -> bool:
         if not path:

@@ -36,6 +36,19 @@ class VisionEncoder:
     def available(self) -> bool:
         return self._load()
 
+    def _feature_vector(self, output) -> np.ndarray:
+        import torch
+
+        if hasattr(output, "pooler_output") and output.pooler_output is not None:
+            tensor = output.pooler_output[0]
+        elif isinstance(output, torch.Tensor):
+            tensor = output[0] if output.ndim > 1 else output
+        else:
+            tensor = torch.as_tensor(output).reshape(-1)
+        vec = tensor.detach().cpu().numpy().astype(np.float32)
+        n = np.linalg.norm(vec)
+        return vec / (n + 1e-9) if n > 0 else vec
+
     def embed_image_path(self, path: Path, ext: str) -> np.ndarray | None:
         if not self._load():
             return None
@@ -58,9 +71,7 @@ class VisionEncoder:
             inputs = self._processor(images=img, return_tensors="pt")
             with torch.no_grad():
                 feats = self._model.get_image_features(**inputs)
-            vec = feats[0].cpu().numpy().astype(np.float32)
-            n = np.linalg.norm(vec)
-            return vec / (n + 1e-9) if n > 0 else vec
+            return self._feature_vector(feats)
         except Exception as e:
             logger.debug("embed_image_path %s: %s", path, e)
             return None
@@ -74,9 +85,7 @@ class VisionEncoder:
             inputs = self._processor(images=img.convert("RGB"), return_tensors="pt")
             with torch.no_grad():
                 feats = self._model.get_image_features(**inputs)
-            vec = feats[0].cpu().numpy().astype(np.float32)
-            n = np.linalg.norm(vec)
-            return vec / (n + 1e-9) if n > 0 else vec
+            return self._feature_vector(feats)
         except Exception:
             return None
 
@@ -89,9 +98,7 @@ class VisionEncoder:
             inputs = self._processor(text=[text], return_tensors="pt", padding=True)
             with torch.no_grad():
                 feats = self._model.get_text_features(**inputs)
-            vec = feats[0].cpu().numpy().astype(np.float32)
-            n = np.linalg.norm(vec)
-            return vec / (n + 1e-9) if n > 0 else vec
+            return self._feature_vector(feats)
         except Exception:
             return None
 

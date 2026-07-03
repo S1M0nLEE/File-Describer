@@ -36,8 +36,12 @@ class FileChangeHandler(FileSystemEventHandler):
     def on_moved(self, event: FileSystemEvent) -> None:
         if event.is_directory:
             return
-        self._handle_delete(event.src_path)
-        self._handle(event.dest_path, "moved")
+        try:
+            self.builder.relocate_file(event.src_path, event.dest_path)
+        except Exception as e:
+            logger.warning("移动回退为重建索引: %s", e)
+            self._handle_delete(event.src_path)
+            self._handle(event.dest_path, "moved")
 
     def _handle(self, path: str, kind: str) -> None:
         p = Path(path)
@@ -50,13 +54,22 @@ class FileChangeHandler(FileSystemEventHandler):
             logger.error("索引失败 %s: %s", path, e)
 
     def _handle_delete(self, path: str) -> None:
+        from src.models.descriptor import FileStatus
+
         try:
             fid = get_file_id(path)
         except Exception:
             fid = f"ghost:{path}"
-        logger.info("[deleted] %s", path)
-        self.builder.neo4j.delete_file(fid)
-        self.builder.chroma.delete_file(fid)
+        logger.info("[deleted/archived] %s", path)
+        node = self.builder.neo4j.get_file(fid)
+        if node and hasattr(self.builder.neo4j, "patch_file"):
+            self.builder.neo4j.patch_file(fid, {"status": FileStatus.ARCHIVED.value, "path": None})
+        elif hasattr(self.builder.neo4j, "_nodes") and fid in getattr(self.builder.neo4j, "_nodes", {}):
+            self.builder.neo4j._nodes[fid]["status"] = FileStatus.ARCHIVED.value
+            self.builder.neo4j._nodes[fid]["path"] = None
+        else:
+            self.builder.neo4j.delete_file(fid)
+            self.builder.chroma.delete_file(fid)
 
 
 class FileWatcher:

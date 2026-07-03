@@ -1,7 +1,7 @@
 api:
-  fast_startup: true
-  manual_load: true
-  preload_graph: false
+  fast_startup: false
+  manual_load: false
+  preload_graph: true
   disk_cache: true
   persist_on_shutdown: false
   heartbeat_enabled: true
@@ -18,23 +18,25 @@ chroma:
   persist_directory: ./data/chroma
 
 index:
-  watch_roots: []
+  watch_roots:
+    - ./data/dataset
   chunk_size: 512
-  similar_threshold: 0.85
-  similar_top_k: 5
-  near_time_window_minutes: 10
-  near_time_max_pairs: 20
+  similar_threshold: 0.75
+  similar_top_k: 200
+  near_time_window_minutes: 5
+  near_time_max_pairs: 50
   dormant_days: 30
   deprecated_observation_days: 7
+  purge_days: 365
 
 llm:
-  enabled: true
+  enabled: false
   ollama_base: http://localhost:11434
   model: phi3:mini
 
-# DeepSeek RAG（API Key 放 .env 的 DEEPSEEK_API_KEY）
+# DeepSeek RAG（API Key 放 .env 的 DEEPSEEK_API_KEY；无 Key 时保持 enabled: false）
 deepseek:
-  enabled: true
+  enabled: false
   base_url: https://api.deepseek.com
   model: deepseek-v4-pro
   temperature: 0.3
@@ -51,16 +53,15 @@ rag:
   index_multimodal: false
   max_files_per_root: 30000
   index_roots:
-    - "${USERPROFILE}/Documents"
-    - "${USERPROFILE}/Desktop"
-    - "${USERPROFILE}/Downloads"
-    - "${USERPROFILE}/Pictures"
-    - "${USERPROFILE}/Videos"
+    - "${HOME}/Documents"
+    - "${HOME}/Desktop"
+    - "${HOME}/Downloads"
+    - "${HOME}/Pictures"
 
 visual:
   enabled: true
   fusion_mode: multi_route
-  threshold: 0.82
+  threshold: 0.65
   model: openai/clip-vit-base-patch32
   doc_backend: auto
   layoutlm_model: microsoft/layoutlmv3-base
@@ -84,7 +85,7 @@ multimodal:
   # Ollama 无名为 whisper 的官方模型；留空则自动用 faster-whisper（推荐）
   whisper_model: ""
   faster_whisper_size: base
-  vision_caption_enabled: true
+  vision_caption_enabled: false
   vision_llm_model: moondream
   visual_index_enabled: true
   fuse_visual_search: true
@@ -96,24 +97,39 @@ multimodal:
 
 workflow:
   collection_enabled: true
-  min_support: 2
+  min_support: 3
+  max_gap: 5
+
+vfe:
+  id_mode: volume
+  memory_capacity: 50
+  near_time_window_seconds: 300
+  relation_ema_alpha: 0.7
+
+cold_start:
+  near_in_time_events: 50
+  workflow_events: 150
+
+consistency:
+  interval_hours: 24
 
 embeddings:
-  model_name: BAAI/bge-small-zh-v1.5
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  raw_dimension: 384
   dimension: 512
-  # auto | sentence_transformers | fastembed | hash
+  use_projection: true
   backend: auto
 
 search:
-  seed_top_n: 50
+  seed_top_n: 100
   result_top_n: 20
-  graph_hops: 2
+  graph_hops: 1
   weights:
-    semantic: 0.50
-    graph: 0.20
-    time: 0.10
-    rule: 0.15
-    personal: 0.05
+    semantic: 0.40
+    graph: 0.25
+    time: 0.15
+    rule: 0.10
+    personal: 0.10
   time_decay_lambda: 0.01
 
 relation_weights:

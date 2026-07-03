@@ -117,6 +117,12 @@ def build_descriptor(
                 break
 
     mime, _ = mimetypes.guess_type(str(path))
+    meta: dict = {}
+    mode = id_mode if id_mode != "volume" else getattr(settings, "vfe_id_mode", "volume")
+    if mode == "sha256":
+        from src.vfe.identity import resolve_vfe_identity
+
+        file_id, meta = resolve_vfe_identity(path, graph=None, id_mode="sha256")
     return FileDescriptor(
         file_id=file_id,
         path=str(path.resolve()),
@@ -132,4 +138,5 @@ def build_descriptor(
         visual_embedding=visual_embedding,
         media_kind=media_kind,
         project_id=project_id,
+        metadata=meta,
     )

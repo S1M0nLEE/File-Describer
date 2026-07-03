@@ -143,7 +143,12 @@ def main() -> None:
     elif args.config:
         cfg = Path(args.config)
         os.environ["FILEKG_CONFIG"] = str(cfg if cfg.is_absolute() else ROOT / cfg)
-        os.environ.setdefault("FILEKG_EVAL_PROFILE", cfg.stem)
+        if "tois" in cfg.stem:
+            os.environ["FILEKG_EVAL_PROFILE"] = "tois_eval"
+        elif "paper" in cfg.stem:
+            os.environ.setdefault("FILEKG_EVAL_PROFILE", "paper_eval")
+        else:
+            os.environ.setdefault("FILEKG_EVAL_PROFILE", cfg.stem)
 
     import importlib
 

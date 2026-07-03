@@ -15,6 +15,7 @@ from src.search import corpus_cache
 from src.indexing.embedder import Embedder
 from src.search.graph_expander import GraphExpander
 from src.search.intent_parser import IntentParser
+from src.search.explanation import explainability_coverage
 from src.search.ranker import MultiFactorRanker, _tokenize
 from src.storage.chroma_store import ChromaStore
 from src.storage.factory import GraphStore
@@ -266,6 +267,7 @@ class SearchEngine:
         ranked = self.ranker.rank(query, parsed, graph_hits, query_emb)
         ranked = self._inject_bm25_candidates(query, parsed, graph_hits, ranked)
         ranked = self._merge_near_duplicate_in_results(ranked)
+        ranked = self._attach_explanations(query, graph_hits, ranked)
 
         for r in ranked[:10]:
             rel = None
@@ -288,6 +290,7 @@ class SearchEngine:
             "seed_count": len(seeds),
             "results": ranked,
             "graph_edges": self._build_graph_view(ranked),
+            "explain_cov": explainability_coverage(ranked),
         }
 
     def navigate_from(
@@ -417,6 +420,41 @@ class SearchEngine:
                 if nb.get("rel_type") == "NEAR_DUPLICATE":
                     seen_dup.add(nb.get("file_id", ""))
         return out
+
+    def _attach_explanations(self, query: str, graph_hits: dict, ranked: list[dict]) -> list[dict]:
+        from src.search.explanation import (
+            compute_factor_scores,
+            explanation_fidelity,
+            generate_explanation,
+        )
+
+        max_graph = max((h.graph_weight for h in graph_hits.values()), default=1.0) or 1.0
+        max_freq = 1.0
+        for fid in graph_hits:
+            node = self.neo4j.get_file(fid) or {}
+            max_freq = max(max_freq, float(len(node.get("access_log") or [])))
+
+        enriched: list[dict] = []
+        for r in ranked:
+            fid = r["file_id"]
+            node = self.neo4j.get_file(fid) or {}
+            hit = graph_hits.get(fid)
+            sem = float(r.get("semantic_score", 0))
+            factors = compute_factor_scores(
+                query,
+                node,
+                hit,
+                semantic=sem,
+                max_graph=max_graph,
+                max_freq=max_freq,
+            )
+            total = float(r.get("score", 0)) or sum(factors.values())
+            r = dict(r)
+            r["factor_scores"] = {k: round(v, 4) for k, v in factors.items()}
+            r["explanation"] = generate_explanation(query, node, hit, factors, self.neo4j)
+            r["fidelity"] = explanation_fidelity(factors, total)
+            enriched.append(r)
+        return enriched
 
     def _build_graph_view(self, results: list[dict]) -> list[dict]:
         edges = []

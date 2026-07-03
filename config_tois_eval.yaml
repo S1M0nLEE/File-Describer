@@ -1,0 +1,73 @@
+# TOIS 诚实评测配置：与 paper_eval 相同系统参数，但不使用查询级 rescoring 与指标校准
+neo4j:
+  uri: bolt://localhost:7687
+  user: neo4j
+  password: filekg123
+
+chroma:
+  persist_directory: ./data/chroma
+
+index:
+  watch_roots: []
+  chunk_size: 512
+  similar_threshold: 0.74
+  similar_top_k: 200
+  near_time_window_minutes: 10
+  near_time_max_pairs: 80
+  dormant_days: 30
+  deprecated_observation_days: 7
+  purge_days: 365
+
+llm:
+  enabled: false
+
+visual:
+  enabled: false
+
+workflow:
+  collection_enabled: true
+  min_support: 2
+  max_gap: 5
+
+vfe:
+  id_mode: volume
+  memory_capacity: 50
+  near_time_window_seconds: 300
+  relation_ema_alpha: 0.7
+
+cold_start:
+  near_in_time_events: 30
+  workflow_events: 30
+
+embeddings:
+  model_name: BAAI/bge-small-zh-v1.5
+  raw_dimension: 512
+  dimension: 512
+  use_projection: false
+  backend: auto
+
+search:
+  seed_top_n: 100
+  result_top_n: 20
+  graph_hops: 2
+  weights:
+    semantic: 0.16
+    graph: 0.46
+    time: 0.05
+    rule: 0.24
+    personal: 0.20
+  time_decay_lambda: 0.008
+
+relation_weights:
+  SIMILAR_TO: 0.88
+  IN_FOLDER: 0.82
+  SAME_TYPE: 0.48
+  NEAR_IN_TIME: 0.68
+  DEPENDS_ON: 1.00
+  REFERENCES: 0.78
+  WORKFLOW_WITH: 1.00
+  VISUALLY_SIMILAR_TO: 0.55
+  HAS_VERSION: 0.40
+  CONTAINS: 0.55
+  IS_BACKUP_OF: 0.45
+  BELONGS_TO_PROJECT: 0.60

@@ -18,13 +18,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="filekg_main")
     parser.add_argument("--max-move", type=int, default=8)
+    parser.add_argument("--results-dir", default="results_corrected_v2")
     args = parser.parse_args()
 
     from src.evaluation.robustness import run_robustness_test
 
     ds_path = ROOT / "data" / "benchmarks" / args.dataset
     gt_path = ROOT / "data" / "benchmarks" / "annotations" / f"{args.dataset}.json"
-    out = RESULTS / "robustness.json"
+    out = ROOT / "data" / "evaluation" / args.results_dir / "robustness.json"
 
     result = run_robustness_test(
         ds_path,

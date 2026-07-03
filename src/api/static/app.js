@@ -461,6 +461,15 @@
           (hasVisual ? " card-visual" : "");
 
         var explain = "";
+        if (r.explanation) {
+          explain +=
+            '<div class="explain explain-native">' +
+            esc(r.explanation) +
+            (r.fidelity != null
+              ? ' <span class="tag">保真度 ' + esc(String(r.fidelity)) + "</span>"
+              : "") +
+            "</div>";
+        }
         (r.explanation_paths || []).forEach(function (ep) {
           var rel = ep.rel_type || "";
           var cc = confClass(ep.confidence);

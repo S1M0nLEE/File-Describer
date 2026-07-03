@@ -113,7 +113,8 @@ class Embedder:
         t = text or " "
         if self._backend == "sentence_transformers" and self._st_model:
             vec = self._st_model.encode(t, normalize_embeddings=True)
-            return vec.tolist()
+            out = vec.tolist()
+            return self._maybe_project(out)
         if self._backend == "fastembed" and self._fe_model:
             vec = next(self._fe_model.embed([t]))
             return vec.tolist()
@@ -126,10 +127,21 @@ class Embedder:
         batch = [t or " " for t in texts]
         if self._backend == "sentence_transformers" and self._st_model:
             vecs = self._st_model.encode(batch, normalize_embeddings=True)
-            return [v.tolist() for v in vecs]
+            return [self._maybe_project(v.tolist()) for v in vecs]
         if self._backend == "fastembed" and self._fe_model:
             return [v.tolist() for v in self._fe_model.embed(batch)]
         return [self._hash_embedding(t) for t in batch]
+
+    def _maybe_project(self, vec: list[float]) -> list[float]:
+        if not getattr(settings, "embedding_use_projection", True):
+            return vec
+        if len(vec) == settings.embedding_dim:
+            return vec
+        if len(vec) == getattr(settings, "embedding_raw_dim", 384):
+            from src.indexing.projection import project_to_512
+
+            return project_to_512(vec)
+        return vec
 
     def _hash_embedding(self, text: str) -> list[float]:
         seed = hashlib.sha256(text.encode()).digest()
