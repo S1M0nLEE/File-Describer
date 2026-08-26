@@ -29,3 +29,6 @@ data/workflow_log.jsonl
 *.jsonl
 
 *.log
+
+# 论文/内部文档（勿提交）
+*.docx
