@@ -1,8 +1,43 @@
-# 个人文件知识图谱
+# FileKG — 个人文件知识图谱
 
-基于《可演化数字代理与多维度关系发现引擎》方案实现的个人文件智能索引、检索与关系导航系统。
+> 仓库名 **File-Describer**，项目代号 **FileKG**（Personal File Knowledge Graph）。
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+基于虚拟文件实体（VFE）的个人文件智能索引、检索与关系导航系统：自动发现 12+ 种文件间关系，支持「向量种子 + 图扩展 + 多因子排序」的可解释混合检索。
+
+## 核心指标（合成/混合基准，`tois_eval` 口径）
+
+| 指标 | 数值 |
+|------|------|
+| 关系保持率（文件移动后） | **97.9%** |
+| SDR@20（代码依赖场景） | **0.522** |
+| MAP@20（合成主基准） | **0.691** |
+
+完整评测请运行 `scripts/run_evaluation.py`，结果输出到本地 `data/evaluation/`（不入库）。
 
 ## 架构
+
+```mermaid
+flowchart LR
+  subgraph index [索引层]
+    Scan[文件扫描] --> Extract[文本/多模态提取]
+    Extract --> Embed[BGE 嵌入]
+    Embed --> Chroma[(Chroma 向量库)]
+    Embed --> Graph[(Neo4j / 本地图)]
+  end
+  subgraph rel [关系发现]
+    Pipeline[插件化 Pipeline] --> Graph
+  end
+  subgraph search [检索层]
+    Intent[意图解析] --> Seed[向量种子]
+    Seed --> Expand[图扩展]
+    Expand --> Rank[多因子排序]
+  end
+  Chroma --> Seed
+  Graph --> Expand
+  Rank --> UI[FastAPI + Web UI]
+```
 
 | 模块 | 技术 | 职责 |
 |------|------|------|
@@ -15,7 +50,7 @@
 
 `IN_FOLDER`, `SAME_TYPE`, `NEAR_IN_TIME`, `SIMILAR_TO`, `HAS_VERSION`, `IS_PREVIOUS_VERSION_OF`, `DEPENDS_ON`, `REFERENCES`, `CONTAINS`, `WORKFLOW_WITH`, `IS_TEMPORARY_OF`, `IS_BACKUP_OF`, `BELONGS_TO_PROJECT`, `TAGGED_WITH`
 
-> `VISUALLY_SIMILAR_TO` / `NEAR_DUPLICATE` 由 **多路融合** 发现（OCR 文本路 + 文档页路 + 视觉对齐 + pHash），详见 `data/evaluation/patent/VISUAL_FUSION_SPEC.md`。需 `visual.enabled: true` 与可选 `torch+transformers`。专利实施例用 `config_patent_full.yaml`（`patent.visual_only: true` 关闭 WORKFLOW_WITH 建边）。
+> `VISUALLY_SIMILAR_TO` / `NEAR_DUPLICATE` 由 **多路融合** 发现（OCR + 文档页 + CLIP + pHash）。需 `visual.enabled: true` 并安装 `requirements-visual.txt`。
 
 ## 本地多模态检索（文档 / 图片 / 视频 / 音频）
 
@@ -30,9 +65,9 @@
 
 首次使用：
 
-```powershell
-pip install opencv-python-headless torch transformers Pillow
-python scripts/setup_multimodal.py   # ollama pull whisper + moondream，缓存 CLIP
+```bash
+pip install -r requirements-visual.txt
+python scripts/setup_multimodal.py
 ```
 
 需本地 **Ollama** 运行中；视频抽帧优先用 OpenCV，无则尝试系统 `ffmpeg`。
@@ -53,25 +88,25 @@ python scripts/run_evaluation.py --registry real --dataset hippocamp_adam --prof
 
 ### 1. 安装依赖（推荐 Python 3.12 虚拟环境）
 
-```powershell
-cd c:\Users\rog\Desktop\test
-py -3.12 -m venv .venv
-.venv\Scripts\activate
+```bash
+git clone https://github.com/S1M0nLEE/File-Describer.git
+cd File-Describer
+python3.12 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env
 ```
 
-或使用一键脚本（自动创建 venv 并运行）：
+**可选**（视觉/多模态，约 2GB+）：
 
-```powershell
-.\scripts\run.ps1 scripts\setup_models.py   # 下载并验证 BGE 模型
-.\scripts\run.ps1 scripts\debug_pipeline.py # 端到端调试
-.\scripts\run.ps1                            # 启动 Web 服务
+```bash
+pip install -r requirements-visual.txt
 ```
 
 ### 1b. 验证模型
 
-```powershell
-.venv\Scripts\python.exe scripts\setup_models.py
+```bash
+python scripts/setup_models.py
 ```
 
 成功时应显示 `embedding_backend: sentence_transformers`，向量维度 512。

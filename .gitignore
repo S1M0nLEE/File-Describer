@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .env
+.python-version
 
 # 本地索引与向量（体积大，勿提交）
 data/chroma/
@@ -18,5 +19,13 @@ data/graph_eval/
 data/benchmarks/
 data/index_local_state.json
 data/runtime_manifest.json
+
+# 合成数据集与实验产物（用 scripts/ 生成）
+data/dataset/
+data/datasets/
+data/evaluation/
+data/robustness_workspace/
+data/workflow_log.jsonl
+*.jsonl
 
 *.log

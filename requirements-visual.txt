@@ -1,4 +1,6 @@
-# 可选：跨模态 VISUALLY_SIMILAR_TO（CLIP）
+# 可选：视觉相似 / 多模态 / 音视频（体积大，按需安装）
+-r requirements.txt
 torch>=2.0.0
 transformers>=4.36.0
-Pillow>=10.0.0
+opencv-python-headless>=4.9.0
+faster-whisper>=1.0.0

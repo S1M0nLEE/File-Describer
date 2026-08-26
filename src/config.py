@@ -111,6 +111,9 @@ class Settings(BaseSettings):
         default=_yaml.get("llm", {}).get("ollama_base", "http://localhost:11434")
     )
     llm_model: str = Field(default=_yaml.get("llm", {}).get("model", "phi3:mini"))
+    use_llm_query_parse: bool = Field(
+        default=_yaml.get("llm", {}).get("use_llm_query_parse", False)
+    )
 
     deepseek_enabled: bool = Field(default=_yaml.get("deepseek", {}).get("enabled", True))
     deepseek_api_key: str = Field(
@@ -290,3 +293,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def get_config() -> Settings:
+    """向后兼容旧版 `get_config()` 调用方。"""
+    return settings
+
+
+Config = Settings

@@ -1,55 +1,68 @@
 import sys
-import time
+from datetime import datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.models.file_descriptor import FileDescriptor
-from src.relations.same_type import SameTypeExtractor
-from src.relations.near_in_time import NearInTimeExtractor
-from src.relations.has_version import HasVersionExtractor
-from src.relations.depends_on import DependsOnExtractor
+from src.models.descriptor import FileDescriptor
+from src.relations.content_relations import DependsOnParser
+from src.relations.metadata_relations import MetadataRelationsParser
+from src.relations.version_relations import VersionRelationsParser
 
 
-def _file(name, ext=".py", content="", mtime=1000.0):
-    path = f"/tmp/{name}"
+def _desc(name: str, *, ext: str = ".txt", mtime: datetime | None = None) -> FileDescriptor:
+    path = f"/tmp/filekg_test/{name}"
+    mt = mtime or datetime(2024, 6, 1, 12, 0, 0)
     return FileDescriptor(
-        id=FileDescriptor.generate_id(path),
+        file_id=f"fid:{name}",
         path=path,
         name=name,
         extension=ext,
         size=100,
-        modified_time=mtime,
-        created_time=mtime,
-        content_text=content,
+        created_time=mt,
+        modified_time=mt,
     )
 
 
 def test_same_type():
-    files = [_file("a.py"), _file("b.py"), _file("c.txt", ext=".txt")]
-    edges = SameTypeExtractor().discover(files)
-    assert any(e[2] == "SAME_TYPE" for e in edges)
+    files = [_desc("a.py", ext=".py"), _desc("b.py", ext=".py"), _desc("c.txt", ext=".txt")]
+    edges = MetadataRelationsParser().discover(files, None)
+    assert any(e.rel_type == "SAME_TYPE" for e in edges)
 
 
 def test_near_in_time():
-    files = [_file("a.txt", ext=".txt", mtime=1000), _file("b.txt", ext=".txt", mtime=1005)]
-    edges = NearInTimeExtractor().discover(files)
-    assert len(edges) >= 1
+    t0 = datetime(2024, 6, 1, 12, 0, 0)
+    t1 = t0 + timedelta(minutes=5)
+    files = [_desc("a.txt", mtime=t0), _desc("b.txt", mtime=t1)]
+    edges = MetadataRelationsParser().discover(files, None)
+    assert any(e.rel_type == "NEAR_IN_TIME" for e in edges)
 
 
 def test_has_version():
-    files = [
-        _file("report_v1.md", ext=".md", content="hello world draft"),
-        _file("report_v2.md", ext=".md", content="hello world final"),
-    ]
-    edges = HasVersionExtractor().discover(files)
-    assert any(e[2] == "HAS_VERSION" for e in edges)
+    files = [_desc("report_v1.md", ext=".md"), _desc("report_v2.md", ext=".md")]
+    edges = VersionRelationsParser().discover(files, None)
+    assert any(e.rel_type == "HAS_VERSION" for e in edges)
 
 
-def test_depends_on_python():
-    util = _file("utils.py", content="def helper():\n    return 1\n")
-    main = _file("main.py", content="from utils import helper\n")
-    edges = DependsOnExtractor().discover([util, main])
-    types = {e[2] for e in edges}
-    assert "DEPENDS_ON" in types or len(edges) == 0
+def test_depends_on_python(tmp_path: Path):
+    util = tmp_path / "utils.py"
+    main = tmp_path / "main.py"
+    util.write_text("def helper():\n    return 1\n", encoding="utf-8")
+    main.write_text("from utils import helper\n", encoding="utf-8")
+    t = datetime(2024, 6, 1, 12, 0, 0)
+
+    def from_path(p: Path) -> FileDescriptor:
+        return FileDescriptor(
+            file_id=f"fid:{p.name}",
+            path=str(p.resolve()),
+            name=p.name,
+            extension=p.suffix.lower(),
+            size=p.stat().st_size,
+            created_time=t,
+            modified_time=t,
+        )
+
+    files = [from_path(util), from_path(main)]
+    edges = DependsOnParser().discover(files, None)
+    assert any(e.rel_type == "DEPENDS_ON" for e in edges)
