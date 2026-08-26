@@ -6,8 +6,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
-from src.graph.store import EdgeRow, ExpandRow, GraphStore
 from src.graph.constants import FILE_FILE_RELATIONS
+from src.graph.store import EdgeRow, ExpandRow, GraphStore
 
 logger = logging.getLogger(__name__)
 

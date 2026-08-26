@@ -4,16 +4,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-import pytest
-from fastapi.testclient import TestClient
-
-from src.api.app import app
-
-
-@pytest.fixture
-def client():
-    return TestClient(app)
-
 
 def test_health(client):
     r = client.get("/health")
@@ -32,7 +22,8 @@ def test_config_endpoint(client):
     r = client.get("/config")
     assert r.status_code == 200
     data = r.json()
-    assert "embedding_model" in data or "neo4j_uri" in data or isinstance(data, dict)
+    assert "embedding_model" in data
+    assert "visual_enabled" in data
 
 
 def test_openapi_docs(client):

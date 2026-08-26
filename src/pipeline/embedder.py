@@ -1,6 +1,7 @@
 """Text embedding with sentence-transformers (BGE-small)."""
 
 from typing import List, Optional, Union
+
 import numpy as np
 
 from src.config import Config

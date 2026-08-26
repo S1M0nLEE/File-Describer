@@ -15,6 +15,8 @@ from src.api.load_progress import (
     set_done,
     set_error,
     set_running,
+)
+from src.api.load_progress import (
     snapshot as load_progress_snapshot,
 )
 from src.config import settings
@@ -41,7 +43,7 @@ _search: SearchEngine | None = None
 _rag: Any = None
 _graph_backend: str = "unknown"
 _fast_startup: bool = True
-_manual_load: bool = True
+_manual_load: bool = False
 _load_thread: threading.Thread | None = None
 _load_running: bool = False
 _preload_task: asyncio.Task | None = None
@@ -239,6 +241,13 @@ def init_on_startup() -> None:
     if not _fast_startup:
         run_full_load(build_corpus=False, build_search=True)
         logger.info("完整启动：图与检索已就绪 (%s)", _graph_backend)
+        return
+    # 非手动 + 快速启动：后台加载图与检索，HTTP 立即可用
+    started = start_load_background(build_corpus=False, build_search=True)
+    if started:
+        logger.info("快速启动：HTTP 已就绪，后台加载全局索引中…")
+    elif _graph is not None and _search is not None:
+        logger.info("快速启动：索引已在内存中 (%s)", _graph_backend)
     else:
         logger.info("快速启动：HTTP 已就绪（非手动模式）")
 
@@ -248,6 +257,16 @@ def ensure_graph() -> tuple[GraphStore, ChromaStore]:
         return _graph, _chroma
     if _manual_load:
         raise GraphNotLoadedError("请先在界面中加载全局索引")
+    with _lock:
+        if _graph is not None and _chroma is not None:
+            return _graph, _chroma
+        return _load_graph_unlocked()
+
+
+def ensure_graph_for_write() -> tuple[GraphStore, ChromaStore]:
+    """写入/索引类 API：允许在手动模式下懒加载图（不要求先加载检索引擎）。"""
+    if _graph is not None and _chroma is not None:
+        return _graph, _chroma
     with _lock:
         if _graph is not None and _chroma is not None:
             return _graph, _chroma

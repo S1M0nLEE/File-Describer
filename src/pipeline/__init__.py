@@ -2,8 +2,8 @@
 
 from .embedder import Embedder
 from .scanner import FileScanner
-from .text_extractor import TextExtractor
 from .summarizer import Summarizer
+from .text_extractor import TextExtractor
 
 __all__ = ["Embedder", "FileScanner", "TextExtractor", "Summarizer", "GraphBuilder"]
 

@@ -1,7 +1,7 @@
 """IN_FOLDER relation: file -> folder."""
 
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import List
 
 from src.models.file_descriptor import FileDescriptor
 from src.models.graph_entities import Folder

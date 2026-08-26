@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional
 import chromadb
 
 from src.config import Config, get_config
-from src.pipeline.embedder import Embedder
 from src.pipeline.chroma_store import CHROMA_COLLECTION
+from src.pipeline.embedder import Embedder
 
 logger = logging.getLogger(__name__)
 

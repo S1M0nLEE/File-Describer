@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
+from typing import Any as Neo4jStore
 
 from src.models.descriptor import FileDescriptor
 from src.relations.base import RelationEdge, RelationParser
 from src.relations.visual_fusion.fusion import VisualFusionDiscoverer
-from typing import Any as Neo4jStore
 
 logger = logging.getLogger(__name__)
 

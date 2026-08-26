@@ -42,6 +42,23 @@
 | `src/rag/` | 本地文件 RAG（DeepSeek + 检索上下文） |
 | `scripts/` | 数据集生成、索引、评测、服务启动 |
 
+## 唯一入口（Canonical Path）
+
+| 用途 | 命令 / 模块 |
+|------|-------------|
+| 启动 API | `python scripts/run_server.py` → `src.api.app:app` |
+| 索引目录 | `python scripts/index_directory.py` → `IndexBuilder` |
+| 检索实现 | `src.search.engine.SearchEngine` |
+| 图存储 | `src.storage.factory.create_graph_store` |
+
+**已废弃**（见 [`legacy/README.md`](../legacy/README.md)）：`src/pipeline/`、`src/retrieval/`、`src/api/main.py`、`scripts/run_indexing.py`（现转发到 IndexBuilder）。
+
+研究脚本在 [`research/scripts/`](../research/scripts/)。
+
+## 安全
+
+本地默认 `127.0.0.1`；可选 Bearer Token 与索引路径 allowlist。详见 [SECURITY.md](SECURITY.md)。
+
 ## 索引流程
 
 1. **扫描**：`scan_directory(root)` 遍历目录，跳过 `node_modules`、`.git` 等。
@@ -86,6 +103,8 @@ python scripts/run_robustness.py
 ```
 
 结果写入本地 `data/evaluation/`（已在 `.gitignore` 排除）。
+
+公开摘要：[`docs/evaluation_snapshot.json`](../docs/evaluation_snapshot.json) · 说明：[`docs/EVALUATION.md`](../docs/EVALUATION.md)
 
 ## 测试
 

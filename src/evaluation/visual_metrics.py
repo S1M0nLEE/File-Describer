@@ -9,7 +9,6 @@ VISUAL_RELATIONS = frozenset({"VISUALLY_SIMILAR_TO", "NEAR_DUPLICATE"})
 
 def requires_visual_multihop(store: GraphStore, seed_ids: list[str], target_name: str) -> bool:
     """相关文件是否必须经 ≥2 跳且含 VISUALLY_SIMILAR_TO 边才能从某种子到达。"""
-    target_nodes = []
     for fid in seed_ids:
         if _reachable_visual_multihop(store, fid, target_name, max_depth=4):
             return True

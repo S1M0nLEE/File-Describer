@@ -8,7 +8,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from src.config import settings
 from src.evaluation.baselines import Baseline
 from src.search.engine import SearchEngine
 

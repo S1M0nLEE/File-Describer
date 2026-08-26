@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-08-26T13:06:29.283369+00:00",
+  "source_dir": "data/evaluation/results_tois",
+  "config_profile": "config_tois_eval.yaml",
+  "eval_profile_env": "FILEKG_EVAL_PROFILE=tois_eval (recommended)",
+  "reproduce": [
+    "python scripts/generate_evaluation_benchmark.py --scale small",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset filekg_main",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset code_dependency",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_robustness.py --dataset filekg_main",
+    "python scripts/export_public_metrics.py"
+  ],
+  "disclaimer": "以下为合成基准上的离线评测结果（FileKG-Full），非第三方认证或生产环境 SLA。原始 report/metrics 在 data/evaluation/（gitignore），本文件为可审计摘要。",
+  "metrics": [
+    {
+      "dataset": "filekg_main",
+      "queries": 40,
+      "files": 238,
+      "filekg_full": {
+        "MAP@20": 0.6906,
+        "Serendipity@20": 0.125,
+        "Recall_indirect@20": 0.7,
+        "GraphDiscovery@20": 0.9042
+      }
+    },
+    {
+      "dataset": "code_dependency",
+      "queries": 15,
+      "files": 11,
+      "filekg_full": {
+        "MAP@20": 0.7234,
+        "Serendipity@20": 0.5222,
+        "Recall_indirect@20": 0.8667,
+        "GraphDiscovery@20": 1.0
+      }
+    },
+    {
+      "dataset": "personal_mixed",
+      "queries": 12,
+      "files": 62,
+      "filekg_full": {
+        "MAP@20": 0.4369,
+        "Serendipity@20": 0.1667,
+        "Recall_indirect@20": 0.6667,
+        "GraphDiscovery@20": 0.6667
+      }
+    }
+  ],
+  "robustness": {
+    "dataset": "filekg_main",
+    "files_moved": 8,
+    "queries_evaluated": 14,
+    "volume_file_id": {
+      "relation_retention_rate": 0.9785,
+      "MAP@20_after_move": 0.6958
+    },
+    "path_based_id": {
+      "logical_relation_retention_rate": 0.9519
+    }
+  }
+}

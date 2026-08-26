@@ -1,6 +1,5 @@
 """Summary generation: truncation + optional Ollama LLM."""
 
-from typing import Optional
 import httpx
 
 from src.config import Config

@@ -1,8 +1,8 @@
 """FileDescriptor node model."""
 
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Optional
 import hashlib
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List
 
 
 @dataclass

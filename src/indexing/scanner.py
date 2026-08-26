@@ -7,10 +7,9 @@ from pathlib import Path
 from src.config import settings
 from src.indexing.embedder import Embedder
 from src.indexing.extractor import build_summary, extract_text
-from src.multimodal.extractor import extract_media_content
 from src.indexing.file_id import get_file_id
 from src.models.descriptor import FileDescriptor, FileStatus
-
+from src.multimodal.extractor import extract_media_content
 
 SKIP_DIRS = {
     ".git", ".svn", "node_modules", "__pycache__", ".venv", "venv",

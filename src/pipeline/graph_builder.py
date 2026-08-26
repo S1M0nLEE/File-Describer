@@ -12,15 +12,15 @@ from src.config import Config, get_config
 from src.graph.factory import create_graph_store
 from src.graph.store import GraphStore
 from src.models.file_descriptor import FileDescriptor
+from src.pipeline.chroma_store import CHROMA_COLLECTION
 from src.pipeline.embedder import Embedder
 from src.pipeline.scanner import FileScanner
 from src.pipeline.summarizer import Summarizer
 from src.pipeline.text_extractor import TextExtractor
 from src.relations import ALL_EXTRACTORS
-from src.relations.in_folder import InFolderExtractor
 from src.relations.belongs_to_project import BelongsToProjectExtractor
+from src.relations.in_folder import InFolderExtractor
 from src.relations.tagged_with import TaggedWithExtractor
-from src.pipeline.chroma_store import CHROMA_COLLECTION
 from src.utils.helpers import days_since, normalize_path
 
 logger = logging.getLogger(__name__)

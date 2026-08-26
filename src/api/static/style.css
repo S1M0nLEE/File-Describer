@@ -590,6 +590,27 @@ a { color: var(--accent); }
 
 .feature-item span { display: block; color: var(--muted); margin-bottom: 0.2rem; }
 
+.section-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.75rem 0 0.5rem;
+  font-weight: 600;
+}
+
+.diag-banner {
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+.diag-banner.diag-error { background: #3f1d1d; border: 1px solid #ef4444; color: #fecaca; }
+.diag-banner.diag-warn { background: #3f2e1d; border: 1px solid #f59e0b; color: #fde68a; }
+.hidden { display: none !important; }
+
+.feature-item.diag-ok { border-color: #166534; }
+.feature-item.diag-warn { border-color: #b45309; }
+.feature-item.diag-critical { border-color: #b91c1c; }
+
 .btn-xs { padding: 0.2rem 0.45rem !important; font-size: 0.7rem !important; }
 
 .rag-chat {

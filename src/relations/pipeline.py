@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any as Neo4jStore
 from typing import Callable
 
 from src.models.descriptor import FileDescriptor
@@ -13,11 +14,10 @@ from src.relations.content_relations import (
     WeakFileParser,
 )
 from src.relations.metadata_relations import MetadataRelationsParser
-from src.relations.version_relations import VersionRelationsParser
 from src.relations.project_relations import ProjectRelationsParser
+from src.relations.version_relations import VersionRelationsParser
 from src.relations.visual_relations import VisualSimilarParser
 from src.relations.workflow_relations import WorkflowParser
-from typing import Any as Neo4jStore
 
 logger = logging.getLogger(__name__)
 

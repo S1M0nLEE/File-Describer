@@ -1,21 +1,19 @@
 from __future__ import annotations
 
+import json
 import re
 from collections import defaultdict
 from pathlib import Path
-
-import json
+from typing import Any as Neo4jStore
 
 import numpy as np
 import yaml
 
 from src.config import settings
-from src.indexing.embedder import Embedder
 from src.indexing.extractor import extract_text, list_archive_members
 from src.models.descriptor import FileDescriptor
 from src.relations.base import RelationEdge, RelationParser
 from src.relations.version_relations import _strip_md_wrapper
-from typing import Any as Neo4jStore
 
 IMPORT_PATTERNS = [
     (re.compile(r"^\s*import\s+([\w.]+)", re.M), ".py"),
@@ -82,8 +80,8 @@ class SimilarToParser(RelationParser):
             index = faiss.IndexFlatIP(matrix.shape[1])
             index.add(matrix)
             for i, d in enumerate(valid):
-                D, I = index.search(matrix[i : i + 1], min(top_k + 1, len(valid)))
-                for j, score in zip(I[0], D[0]):
+                D, indices = index.search(matrix[i : i + 1], min(top_k + 1, len(valid)))
+                for j, score in zip(indices[0], D[0]):
                     if j < 0 or j == i or score < threshold:
                         continue
                     if i < j:

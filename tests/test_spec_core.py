@@ -11,7 +11,7 @@ from src.search.explanation import (
     generate_explanation,
     rule_match_score,
 )
-from src.vfe.identity import compute_vfe_id, content_hash_prefix
+from src.vfe.identity import compute_vfe_id
 from src.vfe.memory import MemoryRecord, VFEMemoryStack, calc_co_weight
 
 

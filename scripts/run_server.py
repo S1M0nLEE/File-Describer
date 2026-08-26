@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 from pathlib import Path
 
@@ -7,12 +8,18 @@ sys.path.insert(0, str(ROOT))
 
 import uvicorn
 
+from src.config import settings
+
 if __name__ == "__main__":
-    # 排除 data 日志/chroma 变更，避免 reload 卡在旧 worker
+    reload = os.environ.get("FILEKG_NO_RELOAD", "").lower() not in ("1", "true", "yes")
+    if "--no-reload" in sys.argv:
+        reload = False
+    host = os.environ.get("FILEKG_HOST", settings.api_host)
+    port = int(os.environ.get("FILEKG_PORT", str(settings.api_port)))
     uvicorn.run(
         "src.api.app:app",
-        host="0.0.0.0",
-        port=8765,
-        reload=True,
-        reload_excludes=["data/*", "*.log"],
+        host=host,
+        port=port,
+        reload=reload,
+        reload_excludes=["data/*", "*.log"] if reload else None,
     )

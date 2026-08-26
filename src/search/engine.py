@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import time
-from collections import defaultdict
 from typing import Any
 
 from rank_bm25 import BM25Okapi
@@ -10,12 +9,12 @@ from rank_bm25 import BM25Okapi
 from src.behavior.collector import WorkflowCollector
 from src.config import settings
 from src.indexing.access_memory import AccessMemory
-from src.search.corpus import build_corpus_from_graph
-from src.search import corpus_cache
 from src.indexing.embedder import Embedder
+from src.search import corpus_cache
+from src.search.corpus import build_corpus_from_graph
+from src.search.explanation import explainability_coverage
 from src.search.graph_expander import GraphExpander
 from src.search.intent_parser import IntentParser
-from src.search.explanation import explainability_coverage
 from src.search.ranker import MultiFactorRanker, _tokenize
 from src.storage.chroma_store import ChromaStore
 from src.storage.factory import GraphStore

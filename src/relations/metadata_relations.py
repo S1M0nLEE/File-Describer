@@ -3,10 +3,10 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
+from typing import Any as Neo4jStore
 
 from src.models.descriptor import FileDescriptor
 from src.relations.base import RelationEdge, RelationParser
-from typing import Any as Neo4jStore
 
 
 class MetadataRelationsParser(RelationParser):

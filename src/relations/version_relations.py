@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from typing import Any as Neo4jStore
 
 from src.indexing.embedder import Embedder
 from src.models.descriptor import FileDescriptor
 from src.relations.base import RelationEdge, RelationParser
-from typing import Any as Neo4jStore
+
 
 def _strip_md_wrapper(name: str) -> str:
     """论文_v1.docx.md -> 论文_v1.docx"""

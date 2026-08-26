@@ -5,7 +5,7 @@ from typing import Optional
 
 from src.config import Config
 from src.models.file_descriptor import FileDescriptor
-from src.utils.helpers import safe_read_text, is_text_extension
+from src.utils.helpers import is_text_extension, safe_read_text
 
 
 class TextExtractor:

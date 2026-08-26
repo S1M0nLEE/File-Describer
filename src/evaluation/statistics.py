@@ -133,7 +133,6 @@ def filekg_vs_best_baseline(per_query: dict[str, list[dict[str, Any]]]) -> dict[
     if not baselines or "FileKG-Full" not in per_query:
         return {}
 
-    fk = {r["query"]: r["ap"] for r in per_query["FileKG-Full"]}
     best_name = None
     best_mean = -1.0
     for b in baselines:

@@ -1,7 +1,7 @@
 """VISUALLY_SIMILAR_TO relation using CLIP on images."""
 
-from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
+
 import numpy as np
 
 from src.config import Config, get_config
@@ -50,8 +50,8 @@ class VisuallySimilarToExtractor(RelationExtractor):
 
     def _encode_image(self, path: str) -> Optional[np.ndarray]:
         try:
-            from PIL import Image
             import torch
+            from PIL import Image
             model, processor = self._load_clip()
             image = Image.open(path).convert("RGB")
             inputs = processor(images=image, return_tensors="pt")

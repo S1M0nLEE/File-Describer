@@ -21,7 +21,7 @@ python scripts/index_directory.py data/dataset --clear
 python scripts/run_server.py
 ```
 
-浏览器打开 **http://localhost:8765**，在检索页尝试：
+浏览器打开 **http://localhost:8765**。服务启动后会**自动后台加载**索引与检索引擎（无需手动点「确认加载」）。在检索页尝试：
 
 - `实验数据`
 - `处理实验数据的 python 代码`
@@ -37,24 +37,54 @@ python scripts/run_server.py
 
 > 截图由 `scripts/generate_dataset.py` + 本地索引生成。更新截图：`python scripts/run_server.py` 后访问 UI 并替换 `docs/assets/` 下 PNG。
 
-## 核心指标（合成/混合基准，`tois_eval` 口径）
+## 核心指标（合成基准，可审计）
 
-| 指标 | 数值 | 说明 |
-|------|------|------|
-| 关系保持率（文件移动后） | **97.9%** | volume 级 `file_id` 鲁棒性 |
-| SDR@20（代码依赖场景） | **0.522** | 多关系「意外发现」优势最明显 |
-| MAP@20（合成主基准） | **0.691** | 与最强向量基线接近 |
+> **说明**：以下为离线合成 benchmark 上的 FileKG-Full 结果，非生产环境或第三方认证指标。  
+> 完整溯源见 [`docs/evaluation_snapshot.json`](docs/evaluation_snapshot.json) 与 [`docs/EVALUATION.md`](docs/EVALUATION.md)。  
+> 简历表述参考 [`docs/RESUME.md`](docs/RESUME.md)。
+
+| 指标 | 数值 | 数据集 / 条件 |
+|------|------|----------------|
+| MAP@20 | **0.691** | `filekg_main`，238 文件 / 40 查询 |
+| Serendipity@20（意外发现率） | **0.522** | `code_dependency`，15 查询 |
+| volume 关系保持率 | **97.85%** | 移动 8 文件后（`file_id` 边保留率 0.9785） |
+
+同配置下 Vector+SIMILAR_TO 在 `filekg_main` 上 MAP 略高（0.711），FileKG 优势主要体现在 **Serendipity@20** 与 **GraphDiscovery@20**（见完整 report）。
 
 复现命令：
 
 ```bash
-python scripts/generate_evaluation_benchmark.py
-export FILEKG_CONFIG=config_tois_eval.yaml
-python scripts/run_evaluation.py --dataset code_dependency
-python scripts/run_robustness.py
+python scripts/generate_evaluation_benchmark.py --scale small
+export FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval
+python scripts/run_evaluation.py --dataset filekg_main --output results_tois
+python scripts/run_evaluation.py --dataset code_dependency --output results_tois
+python scripts/run_robustness.py --dataset filekg_main --results-dir results_tois
+python scripts/export_public_metrics.py
 ```
 
-结果输出到本地 `data/evaluation/`（不入库）。指标解读见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+原始 report 输出到本地 `data/evaluation/`（不入库）。
+
+### 真实公开 benchmark（HippoCamp 等）
+
+与合成 `filekg_main` 不同，以下为 **HuggingFace 公开数据集**上的离线评测：
+
+| 数据集 | 来源 | FileKG-Full MAP@20（快照） |
+|--------|------|---------------------------|
+| hippocamp_adam | [MMMem-org/HippoCamp](https://huggingface.co/datasets/MMMem-org/HippoCamp) | **0.437**（344 文件 / 123 查询） |
+| hippocamp_bei | 同上 | 0.167 |
+| real_github_repos | GitHub 开源仓库聚合 | 0.029 |
+
+> 真实集 MAP **低于**合成集属正常（跨语言、个人文件分布更复杂）。  
+> 摘要：[`docs/real_benchmark_snapshot.json`](docs/real_benchmark_snapshot.json) · 说明见 [`docs/EVALUATION.md`](docs/EVALUATION.md#真实公开-benchmark)
+
+```bash
+python scripts/download_hippocamp_subset.py   # 158 文件 / 18 QA
+python scripts/download_real_benchmarks.py --hippocamp --subset
+FILEKG_CONFIG=config_tois_eval.yaml python scripts/run_evaluation.py --registry real --dataset hippocamp_adam
+python scripts/export_real_benchmark_metrics.py
+```
+
+自动化测试：`tests/test_real_benchmark.py`（metadata 进 CI；完整文件检索见 `real-benchmark` CI job）。
 
 ## 架构
 
@@ -62,7 +92,7 @@ python scripts/run_robustness.py
 flowchart LR
   subgraph index [索引层]
     Scan[文件扫描] --> Extract[文本/多模态提取]
-    Extract --> Embed[BGE 嵌入]
+    Extract --> Embed[句向量嵌入]
     Embed --> Chroma[(Chroma)]
     Embed --> Graph[(Neo4j / 本地图)]
   end
@@ -100,9 +130,9 @@ python scripts/setup_models.py
 
 | 嵌入后端 | 说明 |
 |----------|------|
-| `sentence_transformers` | 默认，BGE 中文 512 维 |
+| `sentence_transformers` | 默认，`all-MiniLM-L6-v2`（512 维投影） |
 | `fastembed` | ONNX 备选 |
-| `hash` | 无模型占位，仅联调 |
+| `hash` | 无模型占位，仅 CI/Docker 演示 |
 
 ### 可选：视觉 / 多模态（约 2GB+）
 
@@ -120,19 +150,33 @@ python scripts/index_directory.py ~/Documents/research
 # 或 API: curl -X POST http://localhost:8765/index -H 'Content-Type: application/json' -d '{"path":"/path/to/dir"}'
 ```
 
-### 启动服务
+### Docker 一键演示
+
+无需本地 Python 环境（使用 hash 嵌入，适合快速看 UI；语义检索请用上方 Quick Demo）：
+
+```bash
+chmod +x scripts/docker-demo.sh
+./scripts/docker-demo.sh
+# 或: docker compose up --build -d filekg
+```
+
+浏览器打开 **http://localhost:8765**。可选 Neo4j：`docker compose --profile neo4j up -d neo4j`。
+
+### 启动服务（本地）
 
 ```bash
 python scripts/run_server.py
-# API 文档: http://localhost:8765/docs
+# 默认 http://127.0.0.1:8765 — API 文档 /docs
 ```
+
+> 安全：默认仅本机访问。对外暴露或 Docker 映射端口时请启用 API Token，见 [docs/SECURITY.md](docs/SECURITY.md)。
 
 ### Neo4j（可选）
 
-无 Docker 时使用本地 `data/graph_store.json`。有 Docker：
+无 Docker 时使用本地 `data/graph_store.json`。需要图数据库时：
 
 ```bash
-docker compose up -d
+docker compose --profile neo4j up -d neo4j
 # http://localhost:7474  用户 neo4j / 密码见 docker-compose.yml
 ```
 
@@ -166,17 +210,34 @@ docs/            架构、Roadmap、GitHub 设置说明
 tests/           单元与 smoke 测试
 ```
 
+## 工程指标（CI 可验证）
+
+| 项 | 当前 |
+|----|------|
+| 自动化测试 | **57**（`pytest tests/ -q`） |
+| 关系发现插件 | **12+** 类型（见 `src/relations/pipeline.py`） |
+| CI | lint · unit · e2e · Docker health smoke |
+
 ## 文档
 
 - [架构说明](docs/ARCHITECTURE.md)
+- [评测与指标溯源](docs/EVALUATION.md)
+- [简历表述参考](docs/RESUME.md)
 - [Roadmap](docs/ROADMAP.md)
-- [GitHub 仓库设置（Description / Topics）](docs/GITHUB_SETUP.md)
+- [安全说明](docs/SECURITY.md)
+- [排障指南](docs/TROUBLESHOOTING.md)
+- [GitHub 仓库设置](docs/GITHUB_SETUP.md)
 
 ## 测试
 
 ```bash
-pytest tests/ -q
+pytest tests/ -q              # 全部
+pytest tests/ -q -m "not e2e" # 单元 / smoke
+pytest tests/ -q -m e2e       # 端到端（含 HTTP 索引→检索）
+ruff check src tests scripts  # 静态检查
 ```
+
+CI：lint · unit · e2e · **real-benchmark (HippoCamp)** · Docker smoke。
 
 ## License
 

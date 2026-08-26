@@ -11,13 +11,17 @@ English · [中文 README](README.md)
 
 FileKG indexes local files as **Virtual File Entities (VFEs)**, discovers **12+ relation types**, and runs **explainable hybrid retrieval**: vector seeds → graph expansion → multi-factor ranking.
 
-| Metric (synthetic / mixed benchmarks, `tois_eval`) | Value |
-|-----------------------------------------------------|-------|
-| Relation retention after file moves | **97.9%** |
-| SDR@20 (code dependency scenario) | **0.522** |
-| MAP@20 (main synthetic benchmark) | **0.691** |
+### Metrics (synthetic benchmarks — auditable)
 
-Reproduce locally: `scripts/run_evaluation.py` → results under `data/evaluation/` (gitignored).
+See [`docs/evaluation_snapshot.json`](docs/evaluation_snapshot.json) and [`docs/EVALUATION.md`](docs/EVALUATION.md). **Not** production or third-party certified numbers.
+
+| Metric | Value | Setting |
+|--------|-------|---------|
+| MAP@20 | **0.691** | `filekg_main`, 238 files / 40 queries |
+| Serendipity@20 | **0.522** | `code_dependency`, 15 queries |
+| Volume relation retention | **97.85%** | After moving 8 files (rate 0.9785) |
+
+Resume wording: [`docs/RESUME.md`](docs/RESUME.md)
 
 ## 5-Minute Demo
 
@@ -29,44 +33,33 @@ python scripts/setup_models.py
 python scripts/generate_dataset.py
 python scripts/index_directory.py data/dataset --clear
 python scripts/run_server.py
-# Open http://localhost:8765 — try query: 实验数据
+# Open http://127.0.0.1:8765 — try query: 实验数据
 ```
 
 ## Architecture
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for module map and data flow.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Install
 
-**Core** (indexing, search, API):
+**Core**:
 
 ```bash
 pip install -r requirements.txt
+python scripts/setup_models.py
 ```
 
-**Optional** (vision / multimodal, ~2GB+):
+**Optional** (vision / multimodal):
 
 ```bash
 pip install -r requirements-visual.txt
 ```
 
-## Features
+## Engineering
 
-- Multi-format indexing (PDF, DOCX, code, optional image/audio/video)
-- Plugin relation pipeline: folder, temporal, dependency, version, similarity, workflow, …
-- Chroma ANN + Neo4j or local JSON graph store
-- FastAPI + Web UI with graph visualization
-- Optional DeepSeek RAG over indexed files
-
-## Tests
-
-```bash
-pytest tests/ -q
-```
-
-## Roadmap
-
-[docs/ROADMAP.md](docs/ROADMAP.md)
+- **53** automated tests (`pytest tests/ -q`)
+- CI: ruff · unit · e2e · Docker smoke
+- Default bind `127.0.0.1`, optional API token — [SECURITY.md](docs/SECURITY.md)
 
 ## License
 

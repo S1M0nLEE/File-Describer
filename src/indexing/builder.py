@@ -140,8 +140,8 @@ class IndexBuilder:
         from datetime import datetime
 
         from src.indexing.scanner import (
-            SKIP_DIRS,
             SKIP_DIR_NAMES,
+            SKIP_DIRS,
             SKIP_EXTENSIONS,
             SKIP_FILENAMES,
             build_descriptor,

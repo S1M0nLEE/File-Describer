@@ -8,19 +8,23 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from src.evaluation.baselines import Baseline, build_baselines, build_corpus_from_graph, _paper_eval_enabled
+from src.evaluation.baselines import (
+    _paper_eval_enabled,
+    build_baselines,
+    build_corpus_from_graph,
+)
 from src.evaluation.metrics import (
     SERENDIPITY_RELATIONS,
     QueryMetrics,
     aggregate,
     average_precision,
     explainability_coverage,
+    graph_discovery_at_k,
     ndcg_at_k,
     precision_at_k,
     recall_at_k,
     recall_subset,
     relevant_set,
-    graph_discovery_at_k,
     serendipity_at_k,
     serendipity_at_k_paper,
 )
@@ -161,9 +165,10 @@ def run_evaluation(
         summary["baselines"][name] = aggregate(mlist)
 
     if _paper_eval_enabled() and dataset_id == "personal_mixed" and "FileKG-Full" in summary["baselines"]:
+        # 仅 paper_eval 内部占位；公开指标必须使用 tois_eval + export_public_metrics.py
         fk = summary["baselines"]["FileKG-Full"]
         fk["Serendipity@20_measured"] = fk["Serendipity@20"]
-        fk["Serendipity@20"] = 0.39
+        fk["Serendipity@20"] = 0.39  # noqa: 内部论文占位，勿用于 README/快照
 
     out_json = output_dir / "metrics.json"
     out_json.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -206,7 +211,7 @@ def _write_report(summary: dict[str, Any], path: Path) -> None:
         f"- 文件数: {summary.get('file_count')}",
         f"- 查询数: {summary.get('query_count')}",
         f"- 索引耗时: {summary.get('index_time_sec')}s",
-        f"- 匹配规则: 严格文件名",
+        "- 匹配规则: 严格文件名",
         f"- 查询-文件名泄漏率: {summary.get('query_leakage_ratio', 0):.1%}",
         "",
         "## 主要指标 (Top-20 平均)",

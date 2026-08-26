@@ -38,6 +38,7 @@
       loadRelationBars();
     }
     if (name === "system") {
+      loadDiagnostics();
       loadFeatureGrid();
     }
     if (name === "rag") {
@@ -260,7 +261,9 @@
 
   function requireGraphReady() {
     if (graphReady) return true;
-    showLoadOverlay(true);
+    if (appConfig.manual_load) {
+      showLoadOverlay(true);
+    }
     return false;
   }
 
@@ -279,7 +282,7 @@
         });
       appConfig = cfg;
 
-      graphReady = !!health.graph_ready;
+      graphReady = !!health.search_ready || !!health.graph_ready;
       maybeShowLoadPrompt(health);
 
       var lp = health.load || {};
@@ -689,6 +692,51 @@
       if (!sorted.length) el.innerHTML = '<p class="meta">暂无关系边，请先索引目录</p>';
     } catch (e) {
       el.innerHTML = '<p class="meta">无法加载</p>';
+    }
+  }
+
+  async function loadDiagnostics() {
+    var grid = $("diagnosticsGrid");
+    var banner = $("diagnosticsBanner");
+    if (!grid) return;
+    try {
+      var diag = await fetch("/health/diagnostics?probe_network=true").then(function (r) {
+        return r.json();
+      });
+      if (banner) {
+        if (!diag.ok) {
+          banner.className = "diag-banner diag-error";
+          banner.textContent =
+            "存在关键问题，检索质量可能不可用。请查看下方自检项并参考 docs/TROUBLESHOOTING.md。";
+          banner.classList.remove("hidden");
+        } else if (diag.warnings) {
+          banner.className = "diag-banner diag-warn";
+          banner.textContent = "系统可运行，但尚未建立索引或存在警告项。可先索引示例数据。";
+          banner.classList.remove("hidden");
+        } else {
+          banner.className = "diag-banner hidden";
+          banner.textContent = "";
+        }
+      }
+      grid.innerHTML = (diag.checks || [])
+        .map(function (c) {
+          var cls = c.ok ? "diag-ok" : c.severity === "critical" ? "diag-critical" : "diag-warn";
+          return (
+            '<div class="feature-item ' +
+            cls +
+            '"><span>' +
+            esc(c.id) +
+            '</span><strong title="' +
+            esc(c.hint || "") +
+            '">' +
+            esc(c.detail) +
+            "</strong></div>"
+          );
+        })
+        .join("");
+    } catch (e) {
+      grid.innerHTML =
+        '<div class="feature-item diag-warn"><span>diagnostics</span><strong>无法加载</strong></div>';
     }
   }
 

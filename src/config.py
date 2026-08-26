@@ -60,7 +60,9 @@ class Settings(BaseSettings):
     )
 
     embedding_model: str = Field(
-        default=_yaml.get("embeddings", {}).get("model_name", "BAAI/bge-small-zh-v1.5")
+        default=_yaml.get("embeddings", {}).get(
+            "model_name", "sentence-transformers/all-MiniLM-L6-v2"
+        )
     )
     embedding_dim: int = Field(default=_yaml.get("embeddings", {}).get("dimension", 512))
     embedding_raw_dim: int = Field(default=int(_yaml.get("embeddings", {}).get("raw_dimension", 384)))
@@ -263,10 +265,10 @@ class Settings(BaseSettings):
         default=_yaml.get("api", {}).get("fast_startup", True)
     )
     api_preload_graph: bool = Field(
-        default=_yaml.get("api", {}).get("preload_graph", False)
+        default=_yaml.get("api", {}).get("preload_graph", True)
     )
     api_manual_load: bool = Field(
-        default=_yaml.get("api", {}).get("manual_load", True)
+        default=_yaml.get("api", {}).get("manual_load", False)
     )
     api_disk_cache: bool = Field(default=_yaml.get("api", {}).get("disk_cache", True))
     api_persist_on_shutdown: bool = Field(
@@ -283,6 +285,21 @@ class Settings(BaseSettings):
     )
     api_heartbeat_skip_relations: bool = Field(
         default=_yaml.get("api", {}).get("heartbeat_skip_relations", True)
+    )
+    api_host: str = Field(default=_yaml.get("api", {}).get("host", "127.0.0.1"))
+    api_port: int = Field(default=int(_yaml.get("api", {}).get("port", 8765)))
+    api_token: str = Field(
+        default=os.environ.get("FILEKG_API_TOKEN", "")
+        or _yaml.get("api", {}).get("token", "")
+    )
+    api_require_token: bool = Field(
+        default=_yaml.get("api", {}).get("require_token", False)
+    )
+    api_index_allow_roots: list[str] = Field(
+        default_factory=lambda: _yaml.get("api", {}).get("index_allow_roots", [])
+    )
+    api_expose_full_paths: bool = Field(
+        default=_yaml.get("api", {}).get("expose_full_paths", False)
     )
 
     data_dir: Path = Field(default=_ROOT / "data")

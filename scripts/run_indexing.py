@@ -1,39 +1,37 @@
 #!/usr/bin/env python3
-"""Run offline indexing pipeline."""
+"""[已废弃] 请改用 scripts/index_directory.py。"""
+from __future__ import annotations
 
 import argparse
 import logging
 import sys
+import warnings
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.config import get_config
-from src.pipeline.graph_builder import GraphBuilder
+warnings.warn(
+    "scripts/run_indexing.py 已废弃，请使用 scripts/index_directory.py",
+    DeprecationWarning,
+    stacklevel=1,
+)
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+from src.indexing.builder import IndexBuilder  # noqa: E402
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Build FileKG index")
-    parser.add_argument("dataset_path", type=Path, help="Root directory to index")
-    parser.add_argument("--no-clear", action="store_true", help="Do not clear existing graph/chroma")
-    parser.add_argument(
-        "--relations",
-        nargs="*",
-        help="Only enable these relation types (default: all)",
-    )
+def main() -> None:
+    parser = argparse.ArgumentParser(description="[废弃] 索引目录到知识图谱")
+    parser.add_argument("path", help="要索引的根目录")
+    parser.add_argument("--clear", action="store_true")
+    parser.add_argument("--max-files", type=int, default=None)
     args = parser.parse_args()
 
-    cfg = get_config()
-    enabled = set(args.relations) if args.relations else None
-    builder = GraphBuilder(cfg, enabled_relations=enabled)
-    try:
-        builder.build_full(args.dataset_path.resolve(), clear=not args.no_clear)
-        print(f"Indexing complete: {args.dataset_path}")
-    finally:
-        builder.close()
+    builder = IndexBuilder()
+    result = builder.build(args.path, clear=args.clear, max_files=args.max_files)
+    print("完成:", result)
 
 
 if __name__ == "__main__":

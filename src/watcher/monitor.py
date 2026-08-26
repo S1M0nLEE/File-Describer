@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import threading
 from pathlib import Path
 
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
@@ -9,7 +8,6 @@ from watchdog.observers import Observer
 
 from src.indexing.builder import IndexBuilder
 from src.indexing.file_id import get_file_id
-from src.storage.factory import GraphStore
 
 logger = logging.getLogger(__name__)
 

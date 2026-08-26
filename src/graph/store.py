@@ -1,7 +1,7 @@
 """Abstract graph storage backend."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 EdgeRow = Tuple[str, str, str, Dict[str, Any]]  # src, tgt, rel_type, props
 ExpandRow = Tuple[str, str, List[str], int]  # seed_id, neighbor_id, rels, hops

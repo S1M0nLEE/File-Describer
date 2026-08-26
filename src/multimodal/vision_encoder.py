@@ -105,7 +105,11 @@ class VisionEncoder:
     def _load(self) -> bool:
         if self._model is not None:
             return True
-        if not settings.visual_enabled and not settings.multimodal_enabled:
+        if not (
+            settings.visual_enabled
+            or settings.multimodal_visual_index_enabled
+            or settings.multimodal_fuse_visual_search
+        ):
             return False
         try:
             from transformers import CLIPModel, CLIPProcessor

@@ -1,21 +1,29 @@
+"""[DEPRECATED] 旧版 API — 请使用 src.api.app。详见 legacy/README.md。"""
+
+import warnings
+
+warnings.warn(
+    "src.api.main 已废弃，请使用 src.api.app (scripts/run_server.py)",
+    DeprecationWarning,
+    stacklevel=1,
+)
+
 """FastAPI search API."""
 
-import json
 import logging
 from contextlib import asynccontextmanager
-from typing import List, Optional
+from typing import List
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from src.config import get_config
-from src.models.file_descriptor import FileDescriptor
 from src.pipeline.embedder import Embedder
 from src.pipeline.graph_builder import GraphBuilder
-from src.retrieval.query_parser import QueryParser
-from src.retrieval.vector_search import VectorSearcher
 from src.retrieval.graph_expander import GraphExpander
+from src.retrieval.query_parser import QueryParser
 from src.retrieval.ranker import Ranker
+from src.retrieval.vector_search import VectorSearcher
 
 logger = logging.getLogger(__name__)
 

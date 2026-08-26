@@ -1,5 +1,13 @@
 api:
-  fast_startup: false
+  host: 127.0.0.1
+  port: 8765
+  # 可选：设置 token 后将 api.require_token 设为 true
+  token: ""
+  require_token: false
+  # 空列表 = 允许 $HOME、项目 data/、仓库根目录
+  index_allow_roots: []
+  expose_full_paths: false
+  fast_startup: true
   manual_load: false
   preload_graph: true
   disk_cache: true

@@ -4,8 +4,6 @@ import json
 import logging
 import os
 import platform
-import subprocess
-import time
 from datetime import datetime
 from pathlib import Path
 

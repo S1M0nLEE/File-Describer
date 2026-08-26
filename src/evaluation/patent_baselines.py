@@ -4,10 +4,10 @@ from __future__ import annotations
 from typing import Any
 
 from src.evaluation.baselines import Baseline, _tokenize
+from src.indexing.embedder import Embedder
 from src.search.engine import SearchEngine
 from src.search.intent_parser import IntentParser
 from src.storage.chroma_store import ChromaStore
-from src.indexing.embedder import Embedder
 
 
 class PatentIFlytekBaseline(Baseline):

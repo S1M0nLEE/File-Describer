@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-26T15:50:30.752748+00:00",
+  "source_dir": "data/evaluation/results_real",
+  "benchmark_type": "public_real",
+  "disclaimer": "真实公开数据集上的离线评测（HippoCamp / GitHub 等），非合成 filekg_main。完整 metrics 在 data/evaluation/results_real/（gitignore）。",
+  "reproduce": [
+    "python scripts/download_real_benchmarks.py --hippocamp --subset",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --registry real --dataset hippocamp_adam --output results_real",
+    "python scripts/export_real_benchmark_metrics.py"
+  ],
+  "datasets": [
+    {
+      "id": "hippocamp_adam",
+      "label": "HippoCamp Adam (HF MMMem-org/HippoCamp)",
+      "files": 344,
+      "queries": 123,
+      "filekg_full": {
+        "MAP@20": 0.4374,
+        "NDCG@20": 0.4861,
+        "Recall_indirect@20": 0.0446,
+        "Serendipity@20": 0.0136,
+        "GraphDiscovery@20": 0.5801
+      },
+      "query_leakage_ratio": 0.7317
+    },
+    {
+      "id": "hippocamp_bei",
+      "label": "HippoCamp Bei",
+      "files": 871,
+      "queries": 235,
+      "filekg_full": {
+        "MAP@20": 0.1667,
+        "NDCG@20": 0.2115,
+        "Recall_indirect@20": 0.026,
+        "Serendipity@20": 0.0006,
+        "GraphDiscovery@20": 0.281
+      },
+      "query_leakage_ratio": 0.4255
+    },
+    {
+      "id": "hippocamp_victoria",
+      "label": "HippoCamp Victoria",
+      "files": 711,
+      "queries": 223,
+      "filekg_full": {
+        "MAP@20": 0.1484,
+        "NDCG@20": 0.2089,
+        "Recall_indirect@20": 0.0126,
+        "Serendipity@20": 0.0135,
+        "GraphDiscovery@20": 0.3652
+      },
+      "query_leakage_ratio": 0.9193
+    },
+    {
+      "id": "real_github_repos",
+      "label": "GitHub 开源仓库聚合",
+      "files": 8972,
+      "queries": 15,
+      "filekg_full": {
+        "MAP@20": 0.0287,
+        "NDCG@20": 0.0735,
+        "Recall_indirect@20": 0.0286,
+        "Serendipity@20": 0.05,
+        "GraphDiscovery@20": 0.0583
+      },
+      "query_leakage_ratio": 0.2
+    }
+  ]
+}

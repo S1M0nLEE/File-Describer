@@ -4,9 +4,9 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 
 from src.config import Config, get_config
+from src.graph.constants import FILE_FILE_RELATIONS
 from src.graph.factory import create_graph_store
 from src.graph.store import GraphStore
-from src.graph.constants import FILE_FILE_RELATIONS
 
 
 @dataclass

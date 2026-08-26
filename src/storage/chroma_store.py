@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 import chromadb
-from chromadb.errors import InternalError, NotFoundError
 from chromadb.config import Settings as ChromaSettings
+from chromadb.errors import InternalError, NotFoundError
 
 from src.config import settings
 from src.models.descriptor import FileDescriptor

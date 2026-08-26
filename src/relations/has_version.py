@@ -1,7 +1,7 @@
 """HAS_VERSION relation via filename patterns and content similarity."""
 
 import re
-from typing import Dict, List, Set
+from typing import Dict, List
 
 from src.models.file_descriptor import FileDescriptor
 from src.relations.base import RelationExtractor

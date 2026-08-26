@@ -1,7 +1,7 @@
 """NEAR_IN_TIME relation via sliding time window."""
 
-from typing import List
 import statistics
+from typing import List
 
 from src.config import Config, get_config
 from src.models.file_descriptor import FileDescriptor

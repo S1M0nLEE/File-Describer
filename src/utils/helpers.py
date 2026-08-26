@@ -2,7 +2,6 @@
 
 import hashlib
 import os
-import stat
 from pathlib import Path
 from typing import Optional
 

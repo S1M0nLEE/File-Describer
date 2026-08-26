@@ -4,8 +4,8 @@ from typing import Any, Dict, List, Set
 
 from neo4j import GraphDatabase
 
-from src.graph.store import EdgeRow, ExpandRow, GraphStore
 from src.graph.constants import FILE_FILE_RELATIONS
+from src.graph.store import EdgeRow, ExpandRow, GraphStore
 
 LABEL_BY_REL = {
     "IN_FOLDER": "Folder",

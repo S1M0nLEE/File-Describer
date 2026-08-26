@@ -5,7 +5,6 @@ import logging
 from typing import Any
 
 import httpx
-
 from src.config import settings
 
 logger = logging.getLogger(__name__)

@@ -10,8 +10,7 @@ from src.config import settings
 from src.models.descriptor import FileDescriptor
 from src.multimodal.vision_encoder import VisionEncoder
 from src.relations.base import RelationEdge
-from src.relations.visual_fusion.confidence import Confidence, decide_confidence
-from src.relations.visual_fusion.confidence import PairSignals
+from src.relations.visual_fusion.confidence import Confidence, PairSignals, decide_confidence
 from src.relations.visual_fusion.doc_page import DocPageSimilarity
 from src.relations.visual_fusion.ocr_layout import (
     extract_ocr_text,

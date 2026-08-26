@@ -6,7 +6,6 @@ import json
 import logging
 import pickle
 from pathlib import Path
-from typing import Any
 
 from src.storage.graph_disk_cache import graph_fingerprint
 

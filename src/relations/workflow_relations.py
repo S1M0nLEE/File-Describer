@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import Any as Neo4jStore
 
 from src.behavior.prefixspan import mine_frequent_adjacent_pairs, mine_frequent_subsequences
 from src.config import settings
 from src.models.descriptor import FileDescriptor
 from src.relations.base import RelationEdge, RelationParser
-from typing import Any as Neo4jStore
 
 
 class WorkflowParser(RelationParser):

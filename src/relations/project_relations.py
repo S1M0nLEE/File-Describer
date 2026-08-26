@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
+from typing import Any as Neo4jStore
 
 from src.models.descriptor import FileDescriptor
 from src.relations.base import RelationEdge, RelationParser
-from typing import Any as Neo4jStore
 
 _TAG_KEYWORDS = {
     "发票": "财务",

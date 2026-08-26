@@ -1,7 +1,6 @@
 """WORKFLOW_WITH relation from co-access / sequential patterns."""
 
-from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 
 from src.config import Config, get_config
 from src.models.file_descriptor import FileDescriptor

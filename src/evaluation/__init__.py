@@ -1,6 +1,6 @@
 from src.evaluation.metrics import (
-    SERENDIPITY_RELATIONS,
     GRAPH_DISCOVERY_RELATIONS,
+    SERENDIPITY_RELATIONS,
     QueryMetrics,
     aggregate,
     average_precision,

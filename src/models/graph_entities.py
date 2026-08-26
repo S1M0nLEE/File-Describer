@@ -1,8 +1,8 @@
 """Graph entity models: Folder, Project, Tag."""
 
-from dataclasses import dataclass, asdict
-from typing import Any, Dict
 import hashlib
+from dataclasses import asdict, dataclass
+from typing import Any, Dict
 
 
 @dataclass

@@ -1,0 +1,63 @@
+{
+  "source": "https://huggingface.co/datasets/MMMem-org/HippoCamp",
+  "license": "See HuggingFace dataset card",
+  "profile": "adam_subset",
+  "note": "公开 QA 标注 fixture；完整文件需 python scripts/download_hippocamp_subset.py",
+  "queries": [
+    {
+      "q": "A client asked whether a potential franchisee is allowed to share confidential Tazza Caffe information with their employees. Can you check the relevant agreement and draft a plain-language explanation I can give to the client?",
+      "direct": [
+        "Tazza-CAFFE-Confidentiality-Agreement.pdf"
+      ],
+      "indirect": [],
+      "source_id": "1",
+      "benchmark": "HippoCamp Adam-Subset"
+    },
+    {
+      "q": "I am processing the divorce judgment of XRM vs XRN. Please analyze the context of the section marked in red. I need you to summarize the judicial logic applied, find the supporting precedent case and relevant paragraphs from my case database, and generate a standard-format case citation that can be directly inserted.",
+      "direct": [
+        "[2025] SGHCF 55.pdf",
+        "[2024] SGHCF 24.pdf"
+      ],
+      "indirect": [],
+      "source_id": "84",
+      "benchmark": "HippoCamp Adam-Subset"
+    },
+    {
+      "q": "I recall that the Mervin Singh case relied heavily on presumptions of knowledge. Can you clarify the prosecution's legal basis, the rationale for the conviction, and the evidence that undermines it?",
+      "direct": [
+        "[2011] SGHC 222.pdf",
+        "Misuse of Drugs Act.pdf",
+        "Facts of the Drug Case.docx"
+      ],
+      "indirect": [],
+      "source_id": "85",
+      "benchmark": "HippoCamp Adam-Subset"
+    },
+    {
+      "q": "Analyze the legal aid request letter sent by the client UMF and provide a comprehensive legal opinion.",
+      "direct": [
+        "[2002] SGCA 50.pdf",
+        "Children and Young Persons Act 1993.pdf",
+        "(2009) 10 SAL Ann Rev 314-339(Family).pdf"
+      ],
+      "indirect": [
+        "2-fjc-casebook---mss.pdf",
+        "521066370-1999-2-SLR-R-0392.pdf",
+        "Supreme Court of Judicature Act.pdf"
+      ],
+      "source_id": "87",
+      "benchmark": "HippoCamp Adam-Subset"
+    },
+    {
+      "q": "Based on the legal aid email I received from Ms. Lim, how should I reply to her professionally?",
+      "direct": [
+        "[2021] SGCA 7.pdf",
+        "Sarah_Lim_to_Adam_Urgent_Legal_Aid_Appeal.eml"
+      ],
+      "indirect": [],
+      "source_id": "89",
+      "benchmark": "HippoCamp Adam-Subset"
+    }
+  ]
+}

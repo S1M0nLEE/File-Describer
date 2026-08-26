@@ -1,6 +1,7 @@
 """SIMILAR_TO relation via FAISS on file embeddings."""
 
 from typing import List, Optional
+
 import numpy as np
 
 from src.config import Config, get_config

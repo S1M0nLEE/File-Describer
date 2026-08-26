@@ -1,6 +1,27 @@
 services:
+  filekg:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      FILEKG_HOST: "0.0.0.0"
+      FILEKG_EMBEDDING_BACKEND: hash
+      FILEKG_INDEX_FAST: "1"
+      FILEKG_API_MANUAL_LOAD: "false"
+      FILEKG_API_HEARTBEAT_ENABLED: "false"
+      FILEKG_NO_RELOAD: "1"
+    volumes:
+      - filekg_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
   neo4j:
     image: neo4j:5.17-community
+    profiles: ["neo4j"]
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -11,4 +32,5 @@ services:
       - neo4j_data:/data
 
 volumes:
+  filekg_data:
   neo4j_data:
