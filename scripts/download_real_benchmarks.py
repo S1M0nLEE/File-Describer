@@ -21,6 +21,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+
+def _load_hf_env() -> None:
+    """加载 .env 中 HF_*（须在 import huggingface_hub 之前）。"""
+    import os
+
+    env_path = ROOT / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        key, val = key.strip(), val.strip()
+        if key.startswith("HF_") and key not in os.environ:
+            os.environ[key] = val
+
+
+_load_hf_env()
+
 BENCH = ROOT / "data" / "benchmarks"
 ANNOT = BENCH / "annotations"
 REGISTRY_REAL = BENCH / "registry_real.json"

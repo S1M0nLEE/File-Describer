@@ -11,8 +11,8 @@ from typing import Any
 from src.evaluation.baselines import (
     _paper_eval_enabled,
     build_baselines,
-    build_corpus_from_graph,
 )
+from src.search.corpus import build_corpus_from_graph
 from src.evaluation.metrics import (
     SERENDIPITY_RELATIONS,
     QueryMetrics,

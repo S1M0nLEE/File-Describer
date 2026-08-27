@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-26T15:50:30.752748+00:00",
+  "generated_at": "2026-08-27T02:54:23.714671+00:00",
   "source_dir": "data/evaluation/results_real",
   "benchmark_type": "public_real",
   "disclaimer": "真实公开数据集上的离线评测（HippoCamp / GitHub 等），非合成 filekg_main。完整 metrics 在 data/evaluation/results_real/（gitignore）。",
@@ -12,14 +12,14 @@
     {
       "id": "hippocamp_adam",
       "label": "HippoCamp Adam (HF MMMem-org/HippoCamp)",
-      "files": 344,
+      "files": 328,
       "queries": 123,
       "filekg_full": {
-        "MAP@20": 0.4374,
-        "NDCG@20": 0.4861,
-        "Recall_indirect@20": 0.0446,
-        "Serendipity@20": 0.0136,
-        "GraphDiscovery@20": 0.5801
+        "MAP@20": 0.5017,
+        "NDCG@20": 0.5648,
+        "Recall_indirect@20": 0.0221,
+        "Serendipity@20": 0.0116,
+        "GraphDiscovery@20": 0.7033
       },
       "query_leakage_ratio": 0.7317
     },
