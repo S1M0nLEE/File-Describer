@@ -70,7 +70,7 @@ python scripts/export_public_metrics.py
 
 | 数据集 | 来源 | FileKG-Full MAP@20（快照） |
 |--------|------|---------------------------|
-| hippocamp_adam | [MMMem-org/HippoCamp](https://huggingface.co/datasets/MMMem-org/HippoCamp) | **0.437**（344 文件 / 123 查询） |
+| hippocamp_adam | [MMMem-org/HippoCamp](https://huggingface.co/datasets/MMMem-org/HippoCamp) | **0.618**（328 文件 / 123 查询，`config_hippocamp_eval.yaml`） |
 | hippocamp_bei | 同上 | 0.167 |
 | real_github_repos | GitHub 开源仓库聚合 | 0.029 |
 

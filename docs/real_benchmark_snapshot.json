@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-27T02:54:23.714671+00:00",
+  "generated_at": "2026-08-27T07:22:27.997684+00:00",
   "source_dir": "data/evaluation/results_real",
   "benchmark_type": "public_real",
   "disclaimer": "真实公开数据集上的离线评测（HippoCamp / GitHub 等），非合成 filekg_main。完整 metrics 在 data/evaluation/results_real/（gitignore）。",
@@ -15,13 +15,13 @@
       "files": 328,
       "queries": 123,
       "filekg_full": {
-        "MAP@20": 0.5017,
-        "NDCG@20": 0.5648,
-        "Recall_indirect@20": 0.0221,
-        "Serendipity@20": 0.0116,
-        "GraphDiscovery@20": 0.7033
+        "MAP@20": 0.6182,
+        "NDCG@20": 0.6738,
+        "Recall_indirect@20": 0.0765,
+        "Serendipity@20": 0.0328,
+        "GraphDiscovery@20": 0.7421
       },
-      "query_leakage_ratio": 0.7317
+      "query_leakage_ratio": 0.7561
     },
     {
       "id": "hippocamp_bei",

@@ -1,0 +1,86 @@
+# HippoCamp 真实 benchmark 诚实评测（英文 QA + 多格式文件）
+# 用法:
+#   python scripts/rebuild_hippocamp_qrels.py
+#   python scripts/run_evaluation.py --config config_hippocamp_eval.yaml --registry real --dataset hippocamp_adam
+
+neo4j:
+  uri: bolt://localhost:7687
+  user: neo4j
+  password: filekg123
+
+chroma:
+  persist_directory: ./data/chroma
+
+index:
+  watch_roots: []
+  chunk_size: 512
+  similar_threshold: 0.72
+  similar_top_k: 150
+  near_time_window_minutes: 15
+  near_time_max_pairs: 100
+  dormant_days: 30
+  deprecated_observation_days: 7
+  purge_days: 365
+
+llm:
+  enabled: false
+
+visual:
+  enabled: false
+
+multimodal:
+  enabled: false
+  visual_index_enabled: false
+  fuse_visual_search: false
+  whisper_enabled: false
+  vision_caption_enabled: false
+
+workflow:
+  collection_enabled: true
+  min_support: 2
+  max_gap: 5
+
+vfe:
+  id_mode: volume
+  memory_capacity: 50
+  near_time_window_seconds: 300
+  relation_ema_alpha: 0.7
+
+cold_start:
+  near_in_time_events: 30
+  workflow_events: 30
+
+embeddings:
+  model_name: BAAI/bge-small-en-v1.5
+  raw_dimension: 384
+  dimension: 384
+  use_projection: false
+  backend: auto
+
+search:
+  seed_top_n: 80
+  result_top_n: 20
+  graph_hops: 3
+  bm25_weight: 0.44
+  weights:
+    semantic: 0.38
+    graph: 0.26
+    time: 0.06
+    rule: 0.18
+    personal: 0.08
+  time_decay_lambda: 0.006
+
+relation_weights:
+  SIMILAR_TO: 0.90
+  IN_FOLDER: 0.88
+  SAME_TYPE: 0.55
+  NEAR_IN_TIME: 0.72
+  DEPENDS_ON: 1.00
+  REFERENCES: 0.92
+  WORKFLOW_WITH: 0.95
+  VISUALLY_SIMILAR_TO: 0.50
+  HAS_VERSION: 0.55
+  CONTAINS: 0.65
+  IS_BACKUP_OF: 0.50
+  BELONGS_TO_PROJECT: 0.75
+  IS_PREVIOUS_VERSION_OF: 0.50

@@ -48,8 +48,8 @@ def test_real_benchmark_snapshot_no_user_paths():
 def test_real_snapshot_hippocamp_adam_map_is_honest():
     data = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
     adam = next(d for d in data["datasets"] if d["id"] == "hippocamp_adam")
-    # 来自 results_real/metrics.json，Fullset 344 文件；低于合成集 MAP 属正常
-    assert 0.2 < adam["filekg_full"]["MAP@20"] < 0.6
+    # 来自 results_real/metrics.json（config_hippocamp_eval + 英文 embedding）
+    assert 0.2 < adam["filekg_full"]["MAP@20"] < 0.75
     assert adam["queries"] >= 100
     assert adam["files"] >= 300
 

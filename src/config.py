@@ -255,6 +255,7 @@ class Settings(BaseSettings):
     w_time: float = Field(default=_yaml.get("search", {}).get("weights", {}).get("time", 0.10))
     w_rule: float = Field(default=_yaml.get("search", {}).get("weights", {}).get("rule", 0.15))
     w_personal: float = Field(default=_yaml.get("search", {}).get("weights", {}).get("personal", 0.05))
+    w_bm25: float = Field(default=float(_yaml.get("search", {}).get("bm25_weight", 0.38)))
     time_decay_lambda: float = Field(default=_yaml.get("search", {}).get("time_decay_lambda", 0.01))
 
     relation_weights: dict[str, float] = Field(

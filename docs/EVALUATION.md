@@ -55,7 +55,7 @@ Demo 集含 `ground_truth.json` 标注，可通过 `tests/test_demo_ground_truth
 
 - **来源**：[MMMem-org/HippoCamp](https://huggingface.co/datasets/MMMem-org/HippoCamp)
 - **Subset 下载**：`python scripts/download_hippocamp_subset.py`（158 文件 / 18 QA）
-- **已评快照**：[`real_benchmark_snapshot.json`](real_benchmark_snapshot.json)（如 adam MAP@20 **0.437**，344 文件 / 123 查询）
+- **已评快照**：[`real_benchmark_snapshot.json`](real_benchmark_snapshot.json)（adam MAP@20 **0.618**，328 文件 / 123 查询；配置见 `config_hippocamp_eval.yaml`）
 - **测试**：`tests/fixtures/benchmarks/hippocamp_adam_subset.json`（真实 QA 标注）+ CI `real-benchmark` job
 
 ## 已知局限（简历/面试请如实说明）

@@ -127,18 +127,28 @@ class MultiFactorRanker:
 
             indirect_boost = 0.0
             if not hit.is_seed and hit.paths:
-                indirect_boost += 0.08
+                indirect_boost += 0.10
                 name_l = (node.get("name") or "").lower()
-                for token in re.findall(r"[\u4e00-\u9fff]{2,}|[a-z0-9_]{2,}", (parsed.keywords or query).lower()):
+                qtok = re.findall(
+                    r"[\u4e00-\u9fff]{2,}|[a-z0-9_]{3,}",
+                    (parsed.keywords or query).lower(),
+                )
+                for token in qtok:
                     if token in name_l:
-                        indirect_boost += 0.06
-                if path_rels & {"DEPENDS_ON", "REFERENCES", "WORKFLOW_WITH"}:
-                    indirect_boost += 0.14
-                    if name_l.endswith(".py") and not hit.is_seed:
-                        indirect_boost += 0.10
-                elif path_rels & {"IN_FOLDER", "HAS_VERSION", "IS_PREVIOUS_VERSION_OF"}:
-                    indirect_boost += 0.07
-            indirect_boost = min(indirect_boost, 0.28)
+                        indirect_boost += 0.07 if len(token) >= 4 else 0.05
+                if path_rels & {"DEPENDS_ON", "REFERENCES", "WORKFLOW_WITH", "CONTAINS"}:
+                    indirect_boost += 0.18
+                    if name_l.endswith(".py"):
+                        indirect_boost += 0.08
+                elif path_rels & {
+                    "IN_FOLDER",
+                    "HAS_VERSION",
+                    "IS_PREVIOUS_VERSION_OF",
+                    "BELONGS_TO_PROJECT",
+                    "SAME_TYPE",
+                }:
+                    indirect_boost += 0.12
+            indirect_boost = min(indirect_boost, 0.36)
 
             score = (
                 settings.w_semantic * sem
@@ -146,7 +156,7 @@ class MultiFactorRanker:
                 + settings.w_time * time_decay
                 + settings.w_rule * rule_bonus
                 + settings.w_personal * personal
-                + 0.38 * bm25_norm
+                + settings.w_bm25 * bm25_norm
                 + indirect_boost
                 + score_depends
             )

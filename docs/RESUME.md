@@ -8,7 +8,7 @@
 - 设计 VFE（volume 级 `file_id`）与插件化关系 Pipeline，实现 12+ 种文件关系自动发现  
 - 实现可解释混合检索：向量种子 → 图扩展 → 多因子排序，Web UI 展示关系路径  
 - 合成基准（`config_tois_eval`）：FileKG-Full MAP@20 **0.691**（238 文件 / 40 查询）；代码依赖 Serendipity@20 **0.522**
-- 真实 benchmark（HippoCamp adam）：MAP@20 **0.437**（344 真实个人文件 / 123 查询，`real_benchmark_snapshot.json`）
+- 真实 benchmark（HippoCamp adam）：MAP@20 **0.618**（328 真实个人文件 / 123 查询，GraphDiscovery@20 **0.742**）
 - 文件移动鲁棒性：volume `file_id` 关系保持率 **97.85%**（合成 benchmark，8 文件移动）
 - 工程化：57 项自动化测试（含 HippoCamp fixture）、Ruff CI、Docker + 真实 benchmark CI job
 

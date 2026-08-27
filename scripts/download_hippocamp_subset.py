@@ -109,19 +109,19 @@ def main() -> None:
     if n_ok == 0:
         print("将仅生成基于 QA 的 ground_truth（需手动放置文件到 data/benchmarks/hippocamp_adam/files）")
 
-    from src.evaluation.hippocamp_qrels import extract_hippocamp_files
+    from src.evaluation.hippocamp_qrels import extract_hippocamp_files, split_direct_indirect
 
     queries = []
     for item in subset_items:
         question = item.get("question") or item.get("query") or item.get("q", "")
         if not question:
             continue
-        files = extract_hippocamp_files(item)
+        direct, indirect = split_direct_indirect(item, max_direct=3)
         queries.append(
             {
                 "q": question,
-                "direct": files[:3],
-                "indirect": files[3:6],
+                "direct": direct,
+                "indirect": indirect,
                 "source_id": item.get("id", ""),
             }
         )

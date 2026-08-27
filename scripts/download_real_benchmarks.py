@@ -165,11 +165,14 @@ def download_hippocamp(profile: str = "adam", *, use_subset: bool = False) -> di
         files = _extract_hippocamp_files(item)
         if files:
             with_gt += 1
+        from src.evaluation.hippocamp_qrels import split_direct_indirect
+
+        direct, indirect = split_direct_indirect(item)
         queries.append(
             {
                 "q": q,
-                "direct": files[:5],
-                "indirect": files[5:10],
+                "direct": direct,
+                "indirect": indirect,
                 "source_id": str(item.get("id", "")),
             }
         )
