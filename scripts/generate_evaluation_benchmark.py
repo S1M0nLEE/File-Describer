@@ -517,6 +517,268 @@ def build_personal_mixed(scale: Scale, *, clean: bool = False) -> None:
     write_annotations("personal_mixed", gt)
 
 
+def build_version_lineage(*, clean: bool = False) -> dict:
+    """专项：版本链 / 备份（HAS_VERSION、IS_BACKUP_OF）。"""
+    root = BENCH / "version_lineage"
+    if clean and root.exists():
+        shutil.rmtree(root)
+    base = datetime.now() - timedelta(days=14)
+    docs = [
+        ("白皮书_v1.docx.md", "# 白皮书 初稿\n概述产品路线。\n"),
+        ("白皮书_v2.docx.md", "# 白皮书 修订\n补充竞品分析。\n"),
+        ("白皮书_v3.docx.md", "# 白皮书 三稿\n更新指标表格。\n"),
+        ("白皮书终稿.pdf.md", "# 白皮书 终稿\n正式发布版本。\n" * 4),
+        ("白皮书_backup.docx.md", "# 白皮书 备份\n与 v2 内容一致备份。\n"),
+        ("需求说明书_draft.md", "# 需求 草案\n"),
+        ("需求说明书_final.md", "# 需求 定稿\n"),
+        ("会议纪要_v1.md", "# 周会纪要 v1\n"),
+        ("会议纪要_v2.md", "# 周会纪要 v2\n"),
+        ("附录A.md", "# 附录\n引用白皮书终稿指标。\n"),
+        ("noise_note.txt", "无关笔记\n"),
+        ("readme_versions.md", "版本目录说明\n"),
+    ]
+    for i, (name, body) in enumerate(docs):
+        write(root / name, body)
+        touch(root / name, base, i * 30)
+
+    queries = [
+        {
+            "q": "白皮书最新终稿",
+            "direct": ["白皮书终稿.pdf.md"],
+            "indirect": ["白皮书_v3.docx.md", "白皮书_v2.docx.md"],
+        },
+        {
+            "q": "白皮书第二版修订",
+            "direct": ["白皮书_v2.docx.md"],
+            "indirect": ["白皮书_v1.docx.md", "白皮书_backup.docx.md"],
+        },
+        {
+            "q": "白皮书备份文件",
+            "direct": ["白皮书_backup.docx.md"],
+            "indirect": ["白皮书_v2.docx.md"],
+        },
+        {
+            "q": "需求说明书定稿",
+            "direct": ["需求说明书_final.md"],
+            "indirect": ["需求说明书_draft.md"],
+        },
+        {
+            "q": "周会纪要最新版",
+            "direct": ["会议纪要_v2.md"],
+            "indirect": ["会议纪要_v1.md"],
+        },
+        {
+            "q": "白皮书所有历史版本",
+            "direct": ["白皮书终稿.pdf.md"],
+            "indirect": ["白皮书_v1.docx.md", "白皮书_v2.docx.md", "白皮书_v3.docx.md"],
+        },
+        {
+            "q": "附录引用的白皮书",
+            "direct": ["附录A.md"],
+            "indirect": ["白皮书终稿.pdf.md"],
+        },
+        {
+            "q": "需求草案文档",
+            "direct": ["需求说明书_draft.md"],
+            "indirect": ["需求说明书_final.md"],
+        },
+    ]
+    gt = {
+        "dataset": "version_lineage",
+        "description": "版本链专项：HAS_VERSION / 备份关系",
+        "focus_relations": ["HAS_VERSION", "IS_BACKUP_OF", "IS_PREVIOUS_VERSION_OF"],
+        "queries": queries,
+    }
+    write_annotations("version_lineage", gt)
+    return {"id": "version_lineage", "files": len(docs), "queries": len(queries)}
+
+
+def build_office_workflow(*, clean: bool = False) -> dict:
+    """专项：办公共现 / 时间邻近（WORKFLOW_WITH、NEAR_IN_TIME）。"""
+    root = BENCH / "office_workflow"
+    if clean and root.exists():
+        shutil.rmtree(root)
+    base = datetime.now() - timedelta(days=3)
+    # 同一时间窗内的「打开」簇：议程 → 纪要 → 幻灯片
+    cluster_a = [
+        ("季度规划_议程.md", "# 议程\n1. 指标回顾\n2. 下季规划\n"),
+        ("季度规划_纪要.md", "# 纪要\n讨论了销售指标与资源。\n"),
+        ("季度规划_幻灯片.pptx.md", "# 幻灯片\n销售漏斗与 OKR\n"),
+    ]
+    cluster_b = [
+        ("客户拜访_清单.csv", "客户,日期\nA,2024-01-02\n"),
+        ("客户拜访_记录.md", "# 拜访记录\n跟进清单中的客户 A。\n"),
+        ("客户拜访_邮件草稿.md", "# 跟进邮件\n引用拜访记录要点。\n"),
+    ]
+    extras = [
+        ("无关_购物清单.txt", "牛奶 鸡蛋\n"),
+        ("模板_空白.md", "# 空模板\n"),
+        ("归档_旧议程.md", "# 去年议程\n"),
+        ("归档_旧纪要.md", "# 去年纪要\n"),
+    ]
+    for i, (name, body) in enumerate(cluster_a):
+        write(root / "q1" / name, body)
+        touch(root / "q1" / name, base, i)  # 同分钟窗
+    for i, (name, body) in enumerate(cluster_b):
+        write(root / "sales" / name, body)
+        touch(root / "sales" / name, base + timedelta(hours=2), i)
+    for i, (name, body) in enumerate(extras):
+        write(root / "misc" / name, body)
+        touch(root / "misc" / name, base - timedelta(days=10), i * 60)
+
+    # 工作流日志：重复打开簇 A，便于 WORKFLOW_WITH
+    log = ROOT / "data" / "workflow_log_office.jsonl"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    seq = [root / "q1" / n for n, _ in cluster_a]
+    with log.open("w", encoding="utf-8") as f:
+        for _ in range(6):
+            for p in seq:
+                f.write(json.dumps({"path": str(p.resolve()), "event": "open"}, ensure_ascii=False) + "\n")
+            f.write(json.dumps({"event": "session_end"}) + "\n")
+
+    queries = [
+        {
+            "q": "季度规划会议纪要",
+            "direct": ["季度规划_纪要.md"],
+            "indirect": ["季度规划_议程.md", "季度规划_幻灯片.pptx.md"],
+        },
+        {
+            "q": "与议程一起打开的幻灯片",
+            "direct": ["季度规划_幻灯片.pptx.md"],
+            "indirect": ["季度规划_议程.md", "季度规划_纪要.md"],
+        },
+        {
+            "q": "客户拜访跟进邮件",
+            "direct": ["客户拜访_邮件草稿.md"],
+            "indirect": ["客户拜访_记录.md", "客户拜访_清单.csv"],
+        },
+        {
+            "q": "拜访清单 csv",
+            "direct": ["客户拜访_清单.csv"],
+            "indirect": ["客户拜访_记录.md"],
+        },
+        {
+            "q": "季度规划议程文档",
+            "direct": ["季度规划_议程.md"],
+            "indirect": ["季度规划_纪要.md"],
+        },
+        {
+            "q": "销售拜访记录",
+            "direct": ["客户拜访_记录.md"],
+            "indirect": ["客户拜访_清单.csv", "客户拜访_邮件草稿.md"],
+        },
+        {
+            "q": "同一时段的规划材料",
+            "direct": ["季度规划_议程.md", "季度规划_纪要.md"],
+            "indirect": ["季度规划_幻灯片.pptx.md"],
+        },
+        {
+            "q": "去年归档议程",
+            "direct": ["归档_旧议程.md"],
+            "indirect": ["归档_旧纪要.md"],
+        },
+    ]
+    gt = {
+        "dataset": "office_workflow",
+        "description": "办公共现专项：WORKFLOW_WITH / NEAR_IN_TIME",
+        "focus_relations": ["WORKFLOW_WITH", "NEAR_IN_TIME", "IN_FOLDER"],
+        "queries": queries,
+    }
+    write_annotations("office_workflow", gt)
+    return {
+        "id": "office_workflow",
+        "files": len(cluster_a) + len(cluster_b) + len(extras),
+        "queries": len(queries),
+    }
+
+
+def build_doc_references(*, clean: bool = False) -> dict:
+    """专项：引用 / 包含（REFERENCES、CONTAINS）。"""
+    root = BENCH / "doc_references"
+    if clean and root.exists():
+        shutil.rmtree(root)
+    base = datetime.now() - timedelta(days=20)
+    files = [
+        ("survey_paper.md", "# Survey\n参见 [bib](file://refs.bib) 与图 fig_arch.png.md\n"),
+        ("method_paper.md", "# Method\n依赖 survey_paper 背景，引用 refs.bib\n"),
+        ("refs.bib", "@article{kg2024,title={File Knowledge Graph}}\n@inproceedings{ir2023,title={IR}}\n"),
+        ("fig_arch.png.md", "系统架构图\n"),
+        ("fig_ablation.png.md", "消融实验图\n"),
+        ("supplement.pdf.md", "# 补充材料\n包含额外表格。\n"),
+        ("notes_on_survey.md", "阅读笔记：survey_paper 第3节\n"),
+        ("dataset_readme.md", "数据说明，打包于 corpus.zip\n"),
+        ("unrelated_todo.txt", "买菜\n"),
+        ("cite_guide.md", "引用格式说明，示例见 refs.bib\n"),
+    ]
+    for i, (name, body) in enumerate(files):
+        write(root / name, body)
+        touch(root / name, base, i * 15)
+
+    with zipfile.ZipFile(root / "corpus.zip", "w") as zf:
+        zf.writestr("raw/table.csv", "a,b\n1,2\n")
+        zf.writestr("raw/meta.json", '{"n": 2}\n')
+
+    queries = [
+        {
+            "q": "综述论文引用的 bib",
+            "direct": ["refs.bib"],
+            "indirect": ["survey_paper.md", "method_paper.md"],
+        },
+        {
+            "q": "架构图文件",
+            "direct": ["fig_arch.png.md"],
+            "indirect": ["survey_paper.md"],
+        },
+        {
+            "q": "方法论文档",
+            "direct": ["method_paper.md"],
+            "indirect": ["survey_paper.md", "refs.bib"],
+        },
+        {
+            "q": "引用格式指南",
+            "direct": ["cite_guide.md"],
+            "indirect": ["refs.bib"],
+        },
+        {
+            "q": "语料压缩包",
+            "direct": ["corpus.zip"],
+            "indirect": ["dataset_readme.md"],
+        },
+        {
+            "q": "综述阅读笔记",
+            "direct": ["notes_on_survey.md"],
+            "indirect": ["survey_paper.md"],
+        },
+        {
+            "q": "消融实验图",
+            "direct": ["fig_ablation.png.md"],
+            "indirect": ["supplement.pdf.md"],
+        },
+        {
+            "q": "补充材料 pdf",
+            "direct": ["supplement.pdf.md"],
+            "indirect": ["fig_ablation.png.md"],
+        },
+    ]
+    gt = {
+        "dataset": "doc_references",
+        "description": "文档引用专项：REFERENCES / CONTAINS",
+        "focus_relations": ["REFERENCES", "CONTAINS", "IN_FOLDER"],
+        "queries": queries,
+    }
+    write_annotations("doc_references", gt)
+    return {"id": "doc_references", "files": len(files) + 1, "queries": len(queries)}
+
+
+def build_extended_benchmarks(*, clean: bool = False) -> list[dict]:
+    """新增三项合成专项（版本链 / 办公共现 / 文档引用）。"""
+    return [
+        build_version_lineage(clean=clean),
+        build_office_workflow(clean=clean),
+        build_doc_references(clean=clean),
+    ]
+
+
 def write_registry(scale: Scale) -> None:
     reg = {
         "datasets": [
@@ -545,6 +807,33 @@ def write_registry(scale: Scale) -> None:
                 "ground_truth": "data/benchmarks/annotations/personal_mixed.json",
                 "queries": scale.mixed_queries,
                 "source": "synthetic",
+            },
+            {
+                "id": "version_lineage",
+                "name": "版本链专项（HAS_VERSION）",
+                "path": "data/benchmarks/version_lineage",
+                "ground_truth": "data/benchmarks/annotations/version_lineage.json",
+                "queries": 8,
+                "target_files": 12,
+                "source": "synthetic_extended",
+            },
+            {
+                "id": "office_workflow",
+                "name": "办公共现专项（WORKFLOW_WITH）",
+                "path": "data/benchmarks/office_workflow",
+                "ground_truth": "data/benchmarks/annotations/office_workflow.json",
+                "queries": 8,
+                "target_files": 10,
+                "source": "synthetic_extended",
+            },
+            {
+                "id": "doc_references",
+                "name": "文档引用专项（REFERENCES）",
+                "path": "data/benchmarks/doc_references",
+                "ground_truth": "data/benchmarks/annotations/doc_references.json",
+                "queries": 8,
+                "target_files": 11,
+                "source": "synthetic_extended",
             },
             {
                 "id": "hippocamp_adam",
@@ -598,12 +887,26 @@ def main() -> None:
         help="small=快速调试, scheme≈1200文件（默认）",
     )
     parser.add_argument("--clean", action="store_true", help="重建前删除已有目录")
+    parser.add_argument(
+        "--extended-only",
+        action="store_true",
+        help="仅生成三项扩展专项（version_lineage / office_workflow / doc_references）",
+    )
     args = parser.parse_args()
     scale = Scale.small() if args.scale == "small" else Scale.scheme()
+
+    if args.extended_only:
+        stats = build_extended_benchmarks(clean=args.clean)
+        write_registry(scale)
+        for s in stats:
+            print(f"  - {s['id']}: {s['files']} 文件, {s['queries']} 查询")
+        print(f"扩展基准已生成: {BENCH}")
+        return
 
     build_filekg_main(scale, clean=args.clean)
     build_code_dependency(scale, clean=args.clean)
     build_personal_mixed(scale, clean=args.clean)
+    ext_stats = build_extended_benchmarks(clean=args.clean)
     write_registry(scale)
     write_human_review_template()
 
@@ -613,6 +916,8 @@ def main() -> None:
     print(f"  - filekg_main: 约 {main_n} 个文件, {scale.main_queries} 查询 (目标 {scale.core_files + scale.noise})")
     print(f"  - code_dependency: 目标 {scale.code_files} 文件, {scale.code_queries} 查询")
     print(f"  - personal_mixed: {scale.mixed_queries} 查询")
+    for s in ext_stats:
+        print(f"  - {s['id']}: {s['files']} 文件, {s['queries']} 查询")
     print(f"  - 索引目录合计约 {total} 个文件")
 
 

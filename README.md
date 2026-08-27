@@ -186,6 +186,24 @@ python scripts/export_real_benchmark_metrics.py
 
 HippoCamp 子集下载与 CI 测试：`tests/test_real_benchmark.py`、`scripts/download_hippocamp_subset.py`。
 
+### 扩展合成专项（新增）
+
+在 `filekg_main` / `code_dependency` / `personal_mixed` 之外，增加三项**关系聚焦**合成集，便于 CI 冒烟与专项消融。规模与标注摘要：[docs/extended_benchmark_snapshot.json](docs/extended_benchmark_snapshot.json)
+
+| 数据集 | 关注关系 | 规模 | 用途 |
+|--------|----------|------|------|
+| `version_lineage` | `HAS_VERSION` / 备份链 | 12 文件 / 8 查询 | 版本导航与终稿排序 |
+| `office_workflow` | `WORKFLOW_WITH` / `NEAR_IN_TIME` | 10 文件 / 8 查询 | 办公共现与时间窗扩展 |
+| `doc_references` | `REFERENCES` / `CONTAINS` | 11 文件 / 8 查询 | 引用图与压缩包包含 |
+
+```bash
+python scripts/generate_evaluation_benchmark.py --extended-only --clean
+python scripts/run_evaluation.py --dataset version_lineage
+# 亦可：office_workflow / doc_references
+```
+
+CI 校验 fixture 元数据与索引→检索冒烟（hash 嵌入）；完整 MAP 需本地真实嵌入后写入评测结果，**不在 README 编造数值**。
+
 ## 项目结构
 
 ```
@@ -209,7 +227,22 @@ pytest tests/ -q -m "not slow"  # 跳过需下载数据的慢测
 ruff check src tests scripts
 ```
 
-CI 包含 lint、单元测试、E2E、Docker 健康检查与 HippoCamp benchmark 元数据校验。
+### CI 流水线
+
+GitHub Actions（[ci.yml](.github/workflows/ci.yml)）在 push / PR 到 `main` 时自动运行：
+
+| Job | 作用 |
+|-----|------|
+| **Lint** | `ruff check` 静态检查 |
+| **Unit** | 单元测试 + 公开指标快照 + 扩展/真实 benchmark 元数据 |
+| **E2E** | 演示集生成后跑端到端索引→检索 |
+| **Security**（新增） | API Token、路径 allowlist、路径脱敏回归 |
+| **Extended-benchmark**（新增） | 生成三项扩展合成集并做索引/检索冒烟 |
+| **Config-profiles**（新增） | `config_tois_eval` / `config_hippocamp_eval` 等配置可加载 + 可解释性字段形状 |
+| **Real-benchmark** | 下载 HippoCamp 子集并跑真实集集成测试 |
+| **Docker** | 镜像构建与 `/health` 冒烟 |
+
+CI 默认 `FILEKG_EMBEDDING_BACKEND=hash`，保证数分钟内跑完；语义 MAP 仍以本地真实嵌入评测为准。
 
 ## 文档
 

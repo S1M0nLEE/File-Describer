@@ -8,6 +8,8 @@ requires-python = ">=3.12"
 markers = [
     "e2e: end-to-end pipeline tests",
     "real_benchmark: 真实公开 benchmark（HippoCamp 等）",
+    "extended_benchmark: 扩展合成专项（version_lineage / office_workflow / doc_references）",
+    "config_profile: 配置文件与评测 profile 加载",
     "slow: 需下载数据或真实嵌入，默认 CI 跳过",
 ]
 

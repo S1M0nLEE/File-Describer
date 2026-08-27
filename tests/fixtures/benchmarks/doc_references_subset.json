@@ -1,0 +1,24 @@
+{
+  "dataset": "doc_references",
+  "source": "synthetic_extended",
+  "description": "文档引用专项 CI fixture：REFERENCES / CONTAINS",
+  "focus_relations": ["REFERENCES", "CONTAINS", "IN_FOLDER"],
+  "files": 11,
+  "queries": [
+    {
+      "q": "综述论文引用的 bib",
+      "direct": ["refs.bib"],
+      "indirect": ["survey_paper.md", "method_paper.md"]
+    },
+    {
+      "q": "架构图文件",
+      "direct": ["fig_arch.png.md"],
+      "indirect": ["survey_paper.md"]
+    },
+    {
+      "q": "语料压缩包",
+      "direct": ["corpus.zip"],
+      "indirect": ["dataset_readme.md"]
+    }
+  ]
+}

@@ -61,6 +61,8 @@ Reproducible offline benchmarks (BM25, vector-only, graph-augmented, FileKG-Full
 
 **Synthetic** ([evaluation_snapshot.json](docs/evaluation_snapshot.json)): MAP@20 **0.691** on `filekg_main`; Serendipity@20 **0.522** on `code_dependency`.
 
+**Extended synthetic suites** ([extended_benchmark_snapshot.json](docs/extended_benchmark_snapshot.json)): `version_lineage` (version edges), `office_workflow` (co-open / near-time), `doc_references` (citations / archives). CI smoke only — run `python scripts/generate_evaluation_benchmark.py --extended-only` then `run_evaluation.py` for MAP.
+
 **Public real-world** ([real_benchmark_snapshot.json](docs/real_benchmark_snapshot.json)): HippoCamp adam MAP@20 **0.618** (328 files / 123 queries) with `config_hippocamp_eval.yaml`.
 
 ```bash
@@ -74,6 +76,8 @@ python scripts/run_evaluation.py --config config_hippocamp_eval.yaml \
 pytest tests/ -q
 ruff check src tests scripts
 ```
+
+CI jobs: lint · unit · e2e · **security** · **extended-benchmark** · **config-profiles** · real-benchmark · docker.
 
 ## License
 

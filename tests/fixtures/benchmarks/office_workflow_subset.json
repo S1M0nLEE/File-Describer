@@ -1,0 +1,24 @@
+{
+  "dataset": "office_workflow",
+  "source": "synthetic_extended",
+  "description": "办公共现专项 CI fixture：WORKFLOW_WITH / NEAR_IN_TIME",
+  "focus_relations": ["WORKFLOW_WITH", "NEAR_IN_TIME", "IN_FOLDER"],
+  "files": 10,
+  "queries": [
+    {
+      "q": "季度规划会议纪要",
+      "direct": ["季度规划_纪要.md"],
+      "indirect": ["季度规划_议程.md", "季度规划_幻灯片.pptx.md"]
+    },
+    {
+      "q": "客户拜访跟进邮件",
+      "direct": ["客户拜访_邮件草稿.md"],
+      "indirect": ["客户拜访_记录.md", "客户拜访_清单.csv"]
+    },
+    {
+      "q": "拜访清单 csv",
+      "direct": ["客户拜访_清单.csv"],
+      "indirect": ["客户拜访_记录.md"]
+    }
+  ]
+}

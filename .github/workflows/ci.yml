@@ -42,11 +42,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pytest
       - name: Run unit tests
-        run: pytest tests/ -q -m "not e2e and not real_benchmark and not slow"
+        run: pytest tests/ -q -m "not e2e and not real_benchmark and not slow and not extended_benchmark"
       - name: Real benchmark metadata tests
         run: pytest tests/test_real_benchmark.py -q -m "real_benchmark and not slow"
       - name: Metrics snapshot tests
         run: pytest tests/test_metrics_snapshot.py -q
+      - name: Extended benchmark metadata
+        run: pytest tests/test_extended_benchmarks.py -q -m "extended_benchmark and not e2e"
+      - name: Config profile tests
+        run: pytest tests/test_config_profiles.py -q -m config_profile
 
   e2e:
     name: E2E pipeline
@@ -62,9 +66,57 @@ jobs:
           pip install -r requirements.txt pytest
       - name: Generate demo dataset
         run: python scripts/generate_dataset.py
-
       - name: Run E2E tests
         run: pytest tests/ -q -m e2e
+
+  security:
+    name: Security regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest
+      - name: Security tests
+        run: pytest tests/test_security.py -q
+
+  extended-benchmark:
+    name: Extended synthetic benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest
+      - name: Generate extended benchmarks
+        run: python scripts/generate_evaluation_benchmark.py --extended-only --clean
+      - name: Metadata + index/search smoke
+        run: pytest tests/test_extended_benchmarks.py tests/test_ci_relation_intent.py -q
+
+  config-profiles:
+    name: Config profiles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest pyyaml
+      - name: Validate eval / runtime configs
+        run: pytest tests/test_config_profiles.py -q
+      - name: Explainability shape smoke
+        run: pytest tests/test_search_explainability.py -q
 
   real-benchmark:
     name: Real benchmark (HippoCamp subset)

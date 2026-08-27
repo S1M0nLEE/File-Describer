@@ -1,0 +1,24 @@
+{
+  "dataset": "version_lineage",
+  "source": "synthetic_extended",
+  "description": "版本链专项 CI fixture：HAS_VERSION / 备份关系",
+  "focus_relations": ["HAS_VERSION", "IS_BACKUP_OF", "IS_PREVIOUS_VERSION_OF"],
+  "files": 12,
+  "queries": [
+    {
+      "q": "白皮书最新终稿",
+      "direct": ["白皮书终稿.pdf.md"],
+      "indirect": ["白皮书_v3.docx.md", "白皮书_v2.docx.md"]
+    },
+    {
+      "q": "白皮书第二版修订",
+      "direct": ["白皮书_v2.docx.md"],
+      "indirect": ["白皮书_v1.docx.md", "白皮书_backup.docx.md"]
+    },
+    {
+      "q": "需求说明书定稿",
+      "direct": ["需求说明书_final.md"],
+      "indirect": ["需求说明书_draft.md"]
+    }
+  ]
+}

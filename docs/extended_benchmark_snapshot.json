@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-08-28T00:00:00+00:00",
+  "benchmark_type": "synthetic_extended",
+  "disclaimer": "三项扩展合成专项的规模与标注摘要。完整 MAP 需本地真实嵌入后运行 run_evaluation；CI 以 fixture 元数据 + 索引冒烟校验为准，不编造 MAP。",
+  "reproduce": [
+    "python scripts/generate_evaluation_benchmark.py --extended-only --clean",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset version_lineage",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset office_workflow",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset doc_references"
+  ],
+  "datasets": [
+    {
+      "id": "version_lineage",
+      "label": "版本链专项（HAS_VERSION）",
+      "files": 12,
+      "queries": 8,
+      "focus_relations": ["HAS_VERSION", "IS_BACKUP_OF", "IS_PREVIOUS_VERSION_OF"],
+      "fixture": "tests/fixtures/benchmarks/version_lineage_subset.json",
+      "ci_status": "metadata_and_index_smoke"
+    },
+    {
+      "id": "office_workflow",
+      "label": "办公共现专项（WORKFLOW_WITH）",
+      "files": 10,
+      "queries": 8,
+      "focus_relations": ["WORKFLOW_WITH", "NEAR_IN_TIME", "IN_FOLDER"],
+      "fixture": "tests/fixtures/benchmarks/office_workflow_subset.json",
+      "ci_status": "metadata_and_index_smoke"
+    },
+    {
+      "id": "doc_references",
+      "label": "文档引用专项（REFERENCES）",
+      "files": 11,
+      "queries": 8,
+      "focus_relations": ["REFERENCES", "CONTAINS", "IN_FOLDER"],
+      "fixture": "tests/fixtures/benchmarks/doc_references_subset.json",
+      "ci_status": "metadata_and_index_smoke"
+    }
+  ]
+}
