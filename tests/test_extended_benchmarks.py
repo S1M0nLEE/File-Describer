@@ -34,6 +34,11 @@ def test_extended_snapshot_schema():
     assert data.get("disclaimer")
     ids = {d["id"] for d in data["datasets"]}
     assert ids == set(FIXTURES)
+    # 公开快照须含真实 FileKG-Full MAP@20（由 export_extended_metrics.py 导出）
+    for d in data["datasets"]:
+        fk = d.get("filekg_full") or {}
+        assert "MAP@20" in fk, f"{d['id']} 缺少 filekg_full.MAP@20"
+        assert 0.0 < float(fk["MAP@20"]) <= 1.0
 
 
 @pytest.mark.extended_benchmark

@@ -1,12 +1,17 @@
 {
-  "generated_at": "2026-08-28T00:00:00+00:00",
+  "generated_at": "2026-08-28T07:47:20.630908+00:00",
   "benchmark_type": "synthetic_extended",
-  "disclaimer": "三项扩展合成专项的规模与标注摘要。完整 MAP 需本地真实嵌入后运行 run_evaluation；CI 以 fixture 元数据 + 索引冒烟校验为准，不编造 MAP。",
+  "source_dir": "data/evaluation/results_extended",
+  "config_profile": "config_tois_eval.yaml",
+  "eval_profile_env": "FILEKG_EVAL_PROFILE=tois_eval",
+  "embedding": "BAAI/bge-small-zh-v1.5 (sentence_transformers)",
+  "disclaimer": "三项扩展合成专项上的 FileKG-Full 离线评测（tois_eval 口径）。原始 metrics 在 data/evaluation/results_extended/（gitignore），本文件为可审计摘要。",
   "reproduce": [
     "python scripts/generate_evaluation_benchmark.py --extended-only --clean",
-    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset version_lineage",
-    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset office_workflow",
-    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset doc_references"
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset version_lineage --results-dir results_extended",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset office_workflow --results-dir results_extended",
+    "FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval python scripts/run_evaluation.py --dataset doc_references --results-dir results_extended",
+    "python scripts/export_extended_metrics.py"
   ],
   "datasets": [
     {
@@ -14,27 +19,54 @@
       "label": "版本链专项（HAS_VERSION）",
       "files": 12,
       "queries": 8,
-      "focus_relations": ["HAS_VERSION", "IS_BACKUP_OF", "IS_PREVIOUS_VERSION_OF"],
+      "focus_relations": [
+        "HAS_VERSION",
+        "IS_BACKUP_OF",
+        "IS_PREVIOUS_VERSION_OF"
+      ],
       "fixture": "tests/fixtures/benchmarks/version_lineage_subset.json",
-      "ci_status": "metadata_and_index_smoke"
+      "filekg_full": {
+        "MAP@20": 0.842,
+        "Serendipity@20": 0.0938,
+        "Recall_indirect@20": 1.0,
+        "GraphDiscovery@20": 1.0
+      }
     },
     {
       "id": "office_workflow",
       "label": "办公共现专项（WORKFLOW_WITH）",
       "files": 10,
       "queries": 8,
-      "focus_relations": ["WORKFLOW_WITH", "NEAR_IN_TIME", "IN_FOLDER"],
+      "focus_relations": [
+        "WORKFLOW_WITH",
+        "NEAR_IN_TIME",
+        "IN_FOLDER"
+      ],
       "fixture": "tests/fixtures/benchmarks/office_workflow_subset.json",
-      "ci_status": "metadata_and_index_smoke"
+      "filekg_full": {
+        "MAP@20": 0.9215,
+        "Serendipity@20": 0.0,
+        "Recall_indirect@20": 1.0,
+        "GraphDiscovery@20": 1.0
+      }
     },
     {
       "id": "doc_references",
       "label": "文档引用专项（REFERENCES）",
       "files": 11,
       "queries": 8,
-      "focus_relations": ["REFERENCES", "CONTAINS", "IN_FOLDER"],
+      "focus_relations": [
+        "REFERENCES",
+        "CONTAINS",
+        "IN_FOLDER"
+      ],
       "fixture": "tests/fixtures/benchmarks/doc_references_subset.json",
-      "ci_status": "metadata_and_index_smoke"
+      "filekg_full": {
+        "MAP@20": 0.7279,
+        "Serendipity@20": 0.0,
+        "Recall_indirect@20": 1.0,
+        "GraphDiscovery@20": 1.0
+      }
     }
   ]
 }

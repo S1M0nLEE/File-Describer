@@ -50,8 +50,7 @@ pytest tests/test_metrics_snapshot.py -q
 | 扩展专项 | `version_lineage` / `office_workflow` / `doc_references` | 关系聚焦消融与 CI 冒烟 |
 | 真实 benchmark | `download_hippocamp_subset.py` → HippoCamp | 公开个人文件 QA（见下） |
 
-扩展专项规模与 fixture 见 [`extended_benchmark_snapshot.json`](extended_benchmark_snapshot.json)；**公开 MAP 仍只认** `evaluation_snapshot.json` / `real_benchmark_snapshot.json` 导出结果。
-
+扩展专项规模与 FileKG-Full MAP 见 [`extended_benchmark_snapshot.json`](extended_benchmark_snapshot.json)（由 `scripts/export_extended_metrics.py` 从 `results_extended` 导出）。主合成指标仍以 `evaluation_snapshot.json` 为准；真实公开集见 `real_benchmark_snapshot.json`。
 Demo 集含 `ground_truth.json` 标注，可通过 `tests/test_demo_ground_truth.py` 在 CI 中验证（hash 嵌入下仅作 smoke）。
 
 ## 真实公开 benchmark（HippoCamp）

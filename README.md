@@ -188,22 +188,25 @@ HippoCamp 子集下载与 CI 测试：`tests/test_real_benchmark.py`、`scripts/
 
 ### 扩展合成专项（新增）
 
-在 `filekg_main` / `code_dependency` / `personal_mixed` 之外，增加三项**关系聚焦**合成集，便于 CI 冒烟与专项消融。规模与标注摘要：[docs/extended_benchmark_snapshot.json](docs/extended_benchmark_snapshot.json)
+在 `filekg_main` / `code_dependency` / `personal_mixed` 之外，增加三项**关系聚焦**合成集。公开快照（含 FileKG-Full MAP@20）：[docs/extended_benchmark_snapshot.json](docs/extended_benchmark_snapshot.json)
 
-| 数据集 | 关注关系 | 规模 | 用途 |
-|--------|----------|------|------|
-| `version_lineage` | `HAS_VERSION` / 备份链 | 12 文件 / 8 查询 | 版本导航与终稿排序 |
-| `office_workflow` | `WORKFLOW_WITH` / `NEAR_IN_TIME` | 10 文件 / 8 查询 | 办公共现与时间窗扩展 |
-| `doc_references` | `REFERENCES` / `CONTAINS` | 11 文件 / 8 查询 | 引用图与压缩包包含 |
+| 数据集 | 关注关系 | 规模 | FileKG-Full MAP@20 |
+|--------|----------|------|-------------------|
+| `version_lineage` | `HAS_VERSION` / 备份链 | 12 文件 / 8 查询 | **0.842** |
+| `office_workflow` | `WORKFLOW_WITH` / `NEAR_IN_TIME` | 10 文件 / 8 查询 | **0.922** |
+| `doc_references` | `REFERENCES` / `CONTAINS` | 11 文件 / 8 查询 | **0.728** |
+
+口径：`config_tois_eval.yaml` + `FILEKG_EVAL_PROFILE=tois_eval`，嵌入 `BAAI/bge-small-zh-v1.5`。
 
 ```bash
 python scripts/generate_evaluation_benchmark.py --extended-only --clean
-python scripts/run_evaluation.py --dataset version_lineage
+FILEKG_CONFIG=config_tois_eval.yaml FILEKG_EVAL_PROFILE=tois_eval \
+  python scripts/run_evaluation.py --dataset version_lineage --results-dir results_extended
 # 亦可：office_workflow / doc_references
+python scripts/export_extended_metrics.py
 ```
 
-CI 校验 fixture 元数据与索引→检索冒烟（hash 嵌入）；完整 MAP 需本地真实嵌入后写入评测结果，**不在 README 编造数值**。
-
+CI 额外校验 fixture 元数据与索引→检索冒烟（hash 嵌入）。
 ## 项目结构
 
 ```
